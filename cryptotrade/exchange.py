@@ -25,5 +25,9 @@ class Exchange:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
+    def get_candlesticks(self, from_, to_, period, start, end):
+        return NotImplemented
+
+    @abc.abstractmethod
     def cancel_all_orders(self):
         return NotImplemented

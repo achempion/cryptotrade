@@ -30,6 +30,10 @@ class Poloniex(exchange.Exchange):
         self.public = plx.PoloniexPublic()
         self.private = plx.Poloniex(apikey=api_key, secret=api_secret)
 
+    def get_candlesticks(self, from_, to_, period, start, end):
+        return self.public.returnChartData(
+            '%s_%s' % (from_, to_), period, start=start, end=end)
+
     def cancel_all_orders(self):
         for currency_pair, orders_ in self.private.returnOpenOrders().items():
             for order in orders_:

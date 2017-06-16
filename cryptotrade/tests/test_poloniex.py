@@ -43,3 +43,10 @@ class TestPoloniex(unittest.TestCase):
                 self.plx.cancel_all_orders()
         cancel_mock.assert_has_calls(
             [mock.call(num) for num in (10, 20, 50)], any_order=True)
+
+    def test_get_candlesticks(self):
+        with mock.patch.object(self.plx.public, 'returnChartData') as m:
+            res = self.plx.get_candlesticks(
+                'BTC', 'XMR', period=300, start=0, end=1000)
+        m.assert_called_once_with('BTC_XMR', 300, start=0, end=1000)
+        self.assertEqual(m.return_value, res)
