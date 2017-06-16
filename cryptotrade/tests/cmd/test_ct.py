@@ -25,4 +25,11 @@ from cryptotrade.cmd import ct
 
 class TestMain(unittest.TestCase):
     def test_main(self):
-        self.assertEqual(0, ct.main())
+        self.assertEqual(0, ct.main(args=[]))
+
+
+class Test_ParseArgs(unittest.TestCase):
+    def test_custom_config_file(self):
+        filename = 'other'
+        args = ct._parse_args(['-c', filename])
+        self.assertEqual(filename, args.config_file)

@@ -22,6 +22,24 @@
 cryptotrade, the cryptocurrency trading automation tool.
 """
 
+import argparse
+import os
+import sys
 
-def main():
+
+CONFIG_FILE = '.cryptotrade.conf'
+CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
+
+
+def _parse_args(args):
+    parser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
+    parser.add_argument(
+        '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
+        help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
+    return parser.parse_args(args)
+
+
+def main(args=sys.argv[1:]):
+    args = _parse_args(args=args)
+    print('args received: %s' % args)
     return 0
