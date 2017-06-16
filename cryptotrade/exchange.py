@@ -44,8 +44,8 @@ class Exchange(object):
     def cancel_all_orders(self):
         return NotImplemented
 
-    def get_worth(self, gold):
-        balances = self.get_balances()
+    def get_worth(self, gold, balances=None):
+        balances = balances or self.get_balances()
 
         if gold == 'USD':
             return self.get_worth('BTC') * self.get_rate('USD', 'BTC')
