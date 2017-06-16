@@ -37,6 +37,11 @@ class Poloniex(exchange.Exchange):
             k: v for k, v in balances.items() if v
         }
 
+    def get_rate(self, from_, to_):
+        ticker = self.public.returnTicker()
+        pair = '%s_%s' % (from_, to_)
+        return ticker[pair]['last']
+
     def get_candlesticks(self, from_, to_, period, start, end):
         return self.public.returnChartData(
             '%s_%s' % (from_, to_), period, start=start, end=end)

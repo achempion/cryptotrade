@@ -58,3 +58,13 @@ class TestPoloniex(unittest.TestCase):
             res = self.plx.get_balances()
         # check that we filtered out currencies that are not owned
         self.assertEqual({'BTC': 1.0, 'XMR': 2.5}, res)
+
+    def test_get_rate(self):
+        ticker = {
+            'BTC_LTC': {'last': 0.0251},
+            'BTC_NXT': {'last': 0.1234},
+        }
+        with mock.patch.object(self.plx.public, 'returnTicker',
+                               return_value=ticker):
+            res = self.plx.get_rate('BTC', 'LTC')
+        self.assertEqual(0.0251, res)

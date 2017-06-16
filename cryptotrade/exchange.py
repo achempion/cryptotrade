@@ -29,6 +29,10 @@ class Exchange:
         return NotImplemented
 
     @abc.abstractmethod
+    def get_rate(self):
+        return NotImplemented
+
+    @abc.abstractmethod
     def get_candlesticks(self, from_, to_, period, start, end):
         return NotImplemented
 
