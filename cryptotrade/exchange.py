@@ -43,3 +43,18 @@ class Exchange(object):
     @abc.abstractmethod
     def cancel_all_orders(self):
         return NotImplemented
+
+    def get_worth(self, gold):
+        balances = self.get_balances()
+
+        if gold == 'USD':
+            return self.get_worth('BTC') * self.get_rate('USD', 'BTC')
+
+        worth = 0
+        for currency, amount in balances.items():
+            if currency == gold:
+                worth += amount
+            else:
+                converted_amount = amount * self.get_rate(gold, currency)
+                worth += converted_amount
+        return worth

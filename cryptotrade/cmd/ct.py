@@ -34,22 +34,6 @@ CONFIG_FILE = '.cryptotrade.conf'
 CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
 
 
-def get_worth(exchange, gold):
-    balances = exchange.get_balances()
-
-    if gold == 'USD':
-        return get_worth(exchange, 'BTC') * exchange.get_rate('USD', 'BTC')
-
-    worth = 0
-    for currency, amount in balances.items():
-        if currency == gold:
-            worth += amount
-        else:
-            converted_amount = amount * exchange.get_rate(gold, currency)
-            worth += converted_amount
-    return worth
-
-
 def _parse_args(args):
     parser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
     parser.add_argument(
@@ -61,10 +45,10 @@ def _parse_args(args):
 def main(args=sys.argv[1:]):
     args = _parse_args(args=args)
     conf = config.get_config(args.config_file)
-    exchange = polo_exchange.Poloniex(conf)
+    ex = polo_exchange.Poloniex(conf)
 
     print('Your portfolio worth is:')
-    print(' * %.4f BTC' % get_worth(exchange, 'BTC'))
-    print(' * %.4f USD' % get_worth(exchange, 'USDT'))
+    print(' * %.4f BTC' % ex.get_worth('BTC'))
+    print(' * %.4f USD' % ex.get_worth('USDT'))
 
     return 0
