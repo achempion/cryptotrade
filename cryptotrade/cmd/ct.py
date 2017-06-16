@@ -62,6 +62,7 @@ def main(args=sys.argv[1:]):
     args = _parse_args(args=args)
     conf = config.get_config(args.config_file)
     exchange = polo_exchange.Poloniex(conf)
+
     print('Your portfolio worth is:')
     print(' * %.4f BTC' % get_worth(exchange, 'BTC'))
     print(' * %.4f USD' % get_worth(exchange, 'USDT'))

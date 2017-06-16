@@ -65,6 +65,7 @@ class Poloniex(exchange.Exchange):
         return ticker[pair]['last']
 
     def get_candlesticks(self, from_, to_, period, start, end):
+        assert from_ == 'BTC', 'poloneix has pairs for BTC only'
         return self.public.returnChartData(
             '%s_%s' % (from_, to_), period, start=start, end=end)
 
