@@ -60,6 +60,7 @@ class Poloniex(exchange.Exchange):
 
     def get_rate(self, from_, to_):
         ticker = self._ticker
+        from_ = from_ if from_ != 'USD' else 'USDT'
         pair = '%s_%s' % (from_, to_)
         return ticker[pair]['last']
 

@@ -24,6 +24,7 @@ import tempfile
 import unittest
 
 from cryptotrade.cmd import ct
+from cryptotrade import exchange
 
 
 class TestMain(unittest.TestCase):
@@ -53,3 +54,43 @@ class Test_ParseArgs(unittest.TestCase):
         filename = 'other'
         args = ct._parse_args(['-c', filename])
         self.assertEqual(filename, args.config_file)
+
+
+class TestGetWorth(unittest.TestCase):
+
+    class FakeExchange(exchange.Exchange):
+
+        def get_balances(self):
+            return {'BTC': 5, 'XMR': 10, 'ETH': 100}
+
+        def get_rate(self, from_, to_):
+            if from_ == 'BTC':
+                if to_ == 'BTC':
+                    return 1
+                elif to_ == 'XMR':
+                    return 0.1
+                else:
+                    return 0.01
+            else:  # BTC -> USD
+                return 2500
+
+        # needed to fulfill abstract interface
+        def cancel_all_orders(self):
+            return NotImplemented
+
+        # needed to fulfill abstract interface
+        def get_candlesticks(self, from_, to_, period, start, end):
+            return NotImplemented
+
+    def setUp(self):
+        super(TestGetWorth, self).setUp()
+        config = object()
+        self.exchange = self.FakeExchange(config)
+
+    def test_get_worth_btc(self):
+        res = ct.get_worth(self.exchange, 'BTC')
+        self.assertEqual(7, res)
+
+    def test_get_worth_usd(self):
+        res = ct.get_worth(self.exchange, 'USD')
+        self.assertEqual(7 * 2500, res)

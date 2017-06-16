@@ -37,6 +37,9 @@ CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
 def get_worth(exchange, gold):
     balances = exchange.get_balances()
 
+    if gold == 'USD':
+        return get_worth(exchange, 'BTC') * exchange.get_rate('USD', 'BTC')
+
     worth = 0
     for currency, amount in balances.items():
         if currency == gold:
@@ -59,6 +62,8 @@ def main(args=sys.argv[1:]):
     args = _parse_args(args=args)
     conf = config.get_config(args.config_file)
     exchange = polo_exchange.Poloniex(conf)
-    print(get_worth(exchange, 'BTC'))
+    print('Your portfolio worth is:')
+    print(' * %.4f BTC' % get_worth(exchange, 'BTC'))
+    print(' * %.4f USD' % get_worth(exchange, 'USDT'))
 
     return 0
