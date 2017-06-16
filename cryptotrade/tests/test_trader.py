@@ -37,7 +37,7 @@ class TestTrade(unittest.TestCase):
         trader.trade(balances, fake_candles, trader_func)
         trader_func.assert_has_calls(
             [
-                mock.call(balances, candle)
-                for candle in fake_candles
+                mock.call(balances, fake_candles, i)
+                for i in range(len(fake_candles))
             ])
         self.assertEqual(len(fake_candles), trader_func.call_count)

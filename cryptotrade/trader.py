@@ -19,6 +19,9 @@
 # SOFTWARE.
 
 
+def noop_trader(balances, candles, i): pass
+
+
 def trade(balances, candles, trader_func):
-    for i, candle in enumerate(candles):
-        trader_func(balances, candle)
+    for i in range(len(candles)):
+        trader_func(balances, candles, i)
