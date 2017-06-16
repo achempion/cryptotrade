@@ -21,11 +21,11 @@
 import abc
 
 
-class Exchange:
+class Exchange(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, conf):
-        super().__init__()
+        super(Exchange, self).__init__()
         self.conf = conf
 
     @abc.abstractmethod

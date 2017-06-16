@@ -27,7 +27,7 @@ import os
 import sys
 
 from cryptotrade import config
-from cryptotrade import poloniex
+from cryptotrade import polo_exchange
 
 
 CONFIG_FILE = '.cryptotrade.conf'
@@ -58,7 +58,7 @@ def _parse_args(args):
 def main(args=sys.argv[1:]):
     args = _parse_args(args=args)
     conf = config.get_config(args.config_file)
-    exchange = poloniex.Poloniex(conf)
+    exchange = polo_exchange.Poloniex(conf)
     print(get_worth(exchange, 'BTC'))
 
     return 0

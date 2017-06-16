@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import poloniex as plx
+from poloniex import poloniex as plx
 
 from cryptotrade import exchange
 
@@ -34,7 +34,7 @@ class MissingPoloniexApiKey(Exception):
 class Poloniex(exchange.Exchange):
 
     def __init__(self, conf):
-        super().__init__(conf)
+        super(Poloniex, self).__init__(conf)
         self.public = plx.PoloniexPublic()
         poloniex_conf = conf.get('poloniex')
         if not poloniex_conf:

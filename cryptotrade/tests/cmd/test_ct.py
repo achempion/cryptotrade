@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import mock
 import os
 import tempfile
-from unittest import mock
 import unittest
 
 from cryptotrade.cmd import ct
@@ -28,13 +28,13 @@ from cryptotrade.cmd import ct
 
 class TestMain(unittest.TestCase):
     def setUp(self):
-        super().setUp()
+        super(TestMain, self).setUp()
         self.fp, self.fname = tempfile.mkstemp()
         os.close(self.fp)
 
     def tearDown(self):
         os.remove(self.fname)
-        super().tearDown()
+        super(TestMain, self).tearDown()
 
     def test_main(self):
         contents = (

@@ -18,20 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from unittest import mock
+import mock
 import unittest
 
-from cryptotrade import poloniex
+from cryptotrade import polo_exchange
 
 
 class TestPoloniex(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestPoloniex, self).setUp()
         conf = {
             'poloniex': {'api_key': 'fakekey', 'api_secret': 'fakesecret'}
         }
-        self.plx = poloniex.Poloniex(conf)
+        self.plx = polo_exchange.Poloniex(conf)
 
     def test_cancel_all_orders(self):
         orders = {
