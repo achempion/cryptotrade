@@ -18,32 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
-cryptotrade, the cryptocurrency trading automation tool.
-"""
-
-import argparse
-import os
-import sys
-
-from cryptotrade import config
+import configparser
 
 
-CONFIG_FILE = '.cryptotrade.conf'
-CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
+_SUPPORTED_SECTIONS = ('poloniex',)
 
 
-def _parse_args(args):
-    parser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
-    parser.add_argument(
-        '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
-        help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
-    return parser.parse_args(args)
-
-
-def main(args=sys.argv[1:]):
-    args = _parse_args(args=args)
-    print('args received: %s' % args)
-    conf = config.get_config(args.config_file)
-    print('configuration: %s' % conf)
-    return 0
+def get_config(filename):
+    config = configparser.ConfigParser()
+    config.read(filename)
+    # filter out unknown sections
+    return {
+        section: config[section]
+        for section in _SUPPORTED_SECTIONS
+        if section in config
+    }
