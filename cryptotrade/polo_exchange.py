@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from cached_property import cached_property_with_ttl
 from poloniex import poloniex as plx
 
 from cryptotrade import exchange
@@ -53,8 +54,12 @@ class Poloniex(exchange.Exchange):
             k: v for k, v in balances.items() if v
         }
 
+    @cached_property_with_ttl(ttl=60)
+    def _ticker(self):
+        return self.public.returnTicker()
+
     def get_rate(self, from_, to_):
-        ticker = self.public.returnTicker()
+        ticker = self._ticker
         pair = '%s_%s' % (from_, to_)
         return ticker[pair]['last']
 

@@ -71,3 +71,10 @@ class TestPoloniex(unittest.TestCase):
                                return_value=ticker):
             res = self.plx.get_rate('BTC', 'LTC')
         self.assertEqual(0.0251, res)
+
+    def test_ticker_cache(self):
+        with mock.patch.object(self.plx.public, 'returnTicker') as m:
+            self.plx._ticker()
+            self.plx._ticker()
+        # second call hasn't called to external api due to cache
+        m.assert_called_once()
