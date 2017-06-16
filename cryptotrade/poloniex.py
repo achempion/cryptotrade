@@ -23,12 +23,28 @@ import poloniex as plx
 from cryptotrade import exchange
 
 
+class MissingPoloniexSection(Exception):
+    message = 'Missing [poloniex] section in the configuration file.'
+
+
+class MissingPoloniexApiKey(Exception):
+    message = 'Missing API key or secret in the configuration file.'
+
+
 class Poloniex(exchange.Exchange):
 
-    def __init__(self, api_secret, api_key):
-        super().__init__()
+    def __init__(self, conf):
+        super().__init__(conf)
         self.public = plx.PoloniexPublic()
-        self.private = plx.Poloniex(apikey=api_key, secret=api_secret)
+        poloniex_conf = conf.get('poloniex')
+        if not poloniex_conf:
+            raise MissingPoloniexSection
+        for key in ('api_key', 'api_secret'):
+            if key not in poloniex_conf:
+                raise MissingPoloniexApiKey
+        self.private = plx.Poloniex(
+            apikey=poloniex_conf['api_key'],
+            secret=poloniex_conf['api_secret'])
 
     def get_balances(self):
         balances = self.private.returnBalances()

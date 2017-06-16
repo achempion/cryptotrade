@@ -18,14 +18,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
+import tempfile
+from unittest import mock
 import unittest
 
 from cryptotrade.cmd import ct
 
 
 class TestMain(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.fp, self.fname = tempfile.mkstemp()
+        os.close(self.fp)
+
+    def tearDown(self):
+        os.remove(self.fname)
+        super().tearDown()
+
     def test_main(self):
-        self.assertEqual(0, ct.main(args=[]))
+        contents = (
+            '[poloniex]\n'
+            'api_key = fakekey\n'
+            'api_secret = fakesecret\n'
+        )
+        with open(self.fname, 'w') as f:
+            f.write(contents)
+        with mock.patch('poloniex.Poloniex._private'):
+            self.assertEqual(0, ct.main(args=['-c', self.fname]))
 
 
 class Test_ParseArgs(unittest.TestCase):

@@ -28,7 +28,10 @@ class TestPoloniex(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
-        self.plx = poloniex.Poloniex('fakesecret', 'fakekey')
+        conf = {
+            'poloniex': {'api_key': 'fakekey', 'api_secret': 'fakesecret'}
+        }
+        self.plx = poloniex.Poloniex(conf)
 
     def test_cancel_all_orders(self):
         orders = {

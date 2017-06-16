@@ -24,6 +24,10 @@ import abc
 class Exchange:
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, conf):
+        super().__init__()
+        self.conf = conf
+
     @abc.abstractmethod
     def get_balances(self):
         return NotImplemented

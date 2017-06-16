@@ -27,10 +27,24 @@ import os
 import sys
 
 from cryptotrade import config
+from cryptotrade import poloniex
 
 
 CONFIG_FILE = '.cryptotrade.conf'
 CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
+
+
+def get_worth(exchange, gold):
+    balances = exchange.get_balances()
+
+    worth = 0
+    for currency, amount in balances.items():
+        if currency == gold:
+            worth += amount
+        else:
+            converted_amount = amount * exchange.get_rate(gold, currency)
+            worth += converted_amount
+    return worth
 
 
 def _parse_args(args):
@@ -43,7 +57,8 @@ def _parse_args(args):
 
 def main(args=sys.argv[1:]):
     args = _parse_args(args=args)
-    print('args received: %s' % args)
     conf = config.get_config(args.config_file)
-    print('configuration: %s' % conf)
+    exchange = poloniex.Poloniex(conf)
+    print(get_worth(exchange, 'BTC'))
+
     return 0
