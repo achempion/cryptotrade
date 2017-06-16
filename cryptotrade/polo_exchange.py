@@ -43,8 +43,8 @@ class Poloniex(exchange.Exchange):
             if key not in poloniex_conf:
                 raise MissingPoloniexApiKey
         self.private = plx.Poloniex(
-            apikey=poloniex_conf['api_key'],
-            secret=poloniex_conf['api_secret'])
+            apikey=poloniex_conf['api_key'].encode('utf-8'),
+            secret=poloniex_conf['api_secret'].encode('utf-8'))
 
     def get_balances(self):
         balances = self.private.returnBalances()
