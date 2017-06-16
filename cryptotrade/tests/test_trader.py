@@ -25,8 +25,19 @@ import unittest
 from cryptotrade import trader
 
 
-class TestTrade(unittest.TestCase):
+class TestNoopTrader(unittest.TestCase):
+    def test_noop_trader_does_nothing(self):
+        balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
+        orig_balances = balances.copy()
+        fake_candles = [
+            {'last': random.random()}
+            for i in range(100)
+        ]
+        trader.trade(balances, fake_candles, trader.noop_trader)
+        self.assertEqual(orig_balances, balances)
 
+
+class TestTrade(unittest.TestCase):
     def test_trade_number_of_callbacks(self):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
         fake_candles = [
