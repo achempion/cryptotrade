@@ -24,12 +24,36 @@ import configparser
 _SUPPORTED_SECTIONS = ('core', 'poloniex',)
 
 
+class TargetNotFound(Exception):
+    message = "No target found in config file."
+
+
+class UnbalancedTarget(Exception):
+    message = "Targets don't add up to 1."
+
+
+# format of target string is: 'BTC=0.XX;ETH=0.XX;...'
+def _extract_target(conf):
+    res = {}
+    target = conf.get('core', {}).get('target', '')
+    if not target:
+        raise TargetNotFound
+    for subtarget in target.split(';'):
+        currency, t = subtarget.split('=')
+        res[currency] = float(t)
+    if sum(v for v in res.values()) != 1.0:
+        raise UnbalancedTarget
+    return res
+
+
 def get_config(filename):
     config = configparser.ConfigParser()
     config.read(filename)
     # filter out unknown sections
-    return {
-        section: config[section]
+    res = {
+        section: dict(config[section])
         for section in _SUPPORTED_SECTIONS
         if section in config and config[section]
     }
+    res['core']['target'] = _extract_target(res)
+    return res

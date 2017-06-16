@@ -37,12 +37,13 @@ class TestGetConfig(unittest.TestCase):
         super(TestGetConfig, self).tearDown()
 
     def test_empty_file(self):
-        self.assertEqual({}, config.get_config(self.fname))
+        self.assertRaises(config.TargetNotFound, config.get_config, self.fname)
 
     def test_file_with_ini_contents(self):
         contents = (
             '[core]\n'
             'opt0 = val0\n'
+            'target = ETH=0.5;BTC=0.5\n'
             '[poloniex]\n'
             'opt1 = val1\n'
             'opt2 = val2\n'
@@ -55,3 +56,25 @@ class TestGetConfig(unittest.TestCase):
         self.assertIn('core', res)
         self.assertIn('poloniex', res)
         self.assertNotIn('unknown', res)
+
+    def test_target(self):
+        contents = (
+            '[core]\n'
+            'target = ETH=0.5;BTC=0.3;XMR=0.2\n'
+        )
+        with open(self.fname, 'w') as f:
+            f.write(contents)
+        res = config.get_config(self.fname)
+        target = res.get('core', {}).get('target', {})
+        self.assertEqual(
+            {'ETH': 0.5, 'BTC': 0.3, 'XMR': 0.2}, target)
+
+    def test_target_numbers_dont_add_up_to_1(self):
+        contents = (
+            '[core]\n'
+            'target = ETH=0.3;BTC=0.8;XMR=0.3\n'
+        )
+        with open(self.fname, 'w') as f:
+            f.write(contents)
+        self.assertRaises(
+            config.UnbalancedTarget, config.get_config, self.fname)
