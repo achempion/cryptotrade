@@ -50,3 +50,11 @@ class TestPoloniex(unittest.TestCase):
                 'BTC', 'XMR', period=300, start=0, end=1000)
         m.assert_called_once_with('BTC_XMR', 300, start=0, end=1000)
         self.assertEqual(m.return_value, res)
+
+    def test_get_balances(self):
+        balances = {'BTC': 1.0, 'XMR': 2.5, 'ETH': 0.0}
+        with mock.patch.object(self.plx.private, 'returnBalances',
+                               return_value=balances):
+            res = self.plx.get_balances()
+        # check that we filtered out currencies that are not owned
+        self.assertEqual({'BTC': 1.0, 'XMR': 2.5}, res)

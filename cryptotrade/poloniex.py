@@ -30,6 +30,13 @@ class Poloniex(exchange.Exchange):
         self.public = plx.PoloniexPublic()
         self.private = plx.Poloniex(apikey=api_key, secret=api_secret)
 
+    def get_balances(self):
+        balances = self.private.returnBalances()
+        return {
+            # filter out currencies that we don't own
+            k: v for k, v in balances.items() if v
+        }
+
     def get_candlesticks(self, from_, to_, period, start, end):
         return self.public.returnChartData(
             '%s_%s' % (from_, to_), period, start=start, end=end)

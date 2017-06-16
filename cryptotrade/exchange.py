@@ -25,6 +25,10 @@ class Exchange:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
+    def get_balances(self):
+        return NotImplemented
+
+    @abc.abstractmethod
     def get_candlesticks(self, from_, to_, period, start, end):
         return NotImplemented
 
