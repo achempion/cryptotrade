@@ -21,7 +21,7 @@
 import configparser
 
 
-_SUPPORTED_SECTIONS = ('poloniex',)
+_SUPPORTED_SECTIONS = ('core', 'poloniex',)
 
 
 def get_config(filename):
@@ -31,5 +31,5 @@ def get_config(filename):
     return {
         section: config[section]
         for section in _SUPPORTED_SECTIONS
-        if section in config
+        if section in config and config[section]
     }
