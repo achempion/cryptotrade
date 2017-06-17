@@ -36,6 +36,8 @@ class MissingPoloniexApiKey(Exception):
 
 class Poloniex(exchange.Exchange):
 
+    CANDLESTICKS = (300, 900, 1800, 7200, 14400, 86400)
+
     def __init__(self, conf):
         super(Poloniex, self).__init__(conf)
         self.public = plx.PoloniexPublic()

@@ -38,6 +38,15 @@ class TradeAssessCommand(Lister):
             metavar='CURRENCY=AMOUNT',
             help='currency balances')
         parser.add_argument(
+            '-i',
+            dest='interval',
+            metavar='MINUTES',
+            required=True,
+            type=int,
+            # todo: untangle from poloniex exchange
+            choices=polo_exchange.Poloniex.CANDLESTICKS,
+            help='time interval between assessment iterations')
+        parser.add_argument(
             '-p',
             dest='period',
             metavar='DAYS',
@@ -71,7 +80,6 @@ class TradeAssessCommand(Lister):
         if total_weight != 1.0:
             raise RuntimeError("error: weights don't add up to 1")
 
-        # todo: allow to specify candlestick length via cli
         if parsed_args.balances:
             balances = collections.defaultdict(float)
             for balance in parsed_args.balances:
@@ -86,7 +94,7 @@ class TradeAssessCommand(Lister):
 
         rates = ex.get_closing_rates(
             gold, list(targets.keys()),
-            60 * 60 * 4,  # use 4h candlesticks
+            parsed_args.interval,
             in_past, now)
 
         # todo: allow to pick strategy via cli
