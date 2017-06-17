@@ -36,8 +36,12 @@ from cryptotrade import trader
 from cryptotrade import version
 
 
-class CtApp(App):
+# todo: maybe move somewhere else
+CONFIG_FILE = '.cryptotrade.conf'
+CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
 
+
+class CtApp(App):
     def __init__(self):
         super(CtApp, self).__init__(
             description=sys.modules[__name__].__doc__,
@@ -46,11 +50,15 @@ class CtApp(App):
             deferred_help=True,
             )
 
+    def build_option_parser(self, *args, **kwargs):
+        parser = super(CtApp, self).build_option_parser(*args, **kwargs)
+        parser.add_argument(
+            '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
+            help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
+        return parser
 
-CONFIG_FILE = '.cryptotrade.conf'
-CONFIG_PATH = os.path.join(os.path.expanduser('~'), CONFIG_FILE)
 
-
+# todo: kill
 def _parse_args(args):
     parser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
     parser.add_argument(
