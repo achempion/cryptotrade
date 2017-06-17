@@ -55,6 +55,16 @@ class TradeAssessCommand(Lister):
 
         gold = 'BTC'
 
+        targets = {}
+        total_weight = 0
+        for target in parsed_args.targets:
+            currency, weight = target.split('=')
+            weight = float(weight)
+            total_weight += weight
+            targets[currency] = weight
+        if total_weight != 1.0:
+            raise RuntimeError("error: weights don't add up to 1")
+
         # todo: allow to specify candlestick length via cli
         if parsed_args.balances:
             balances = collections.defaultdict(float)
@@ -67,16 +77,6 @@ class TradeAssessCommand(Lister):
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
-
-        targets = {}
-        total_weight = 0
-        for target in parsed_args.targets:
-            currency, weight = target.split('=')
-            weight = float(weight)
-            total_weight += weight
-            targets[currency] = weight
-        if total_weight != 1.0:
-            raise RuntimeError("error: weights don't add up to 1")
 
         rates = ex.get_closing_rates(
             gold, list(targets.keys()),
