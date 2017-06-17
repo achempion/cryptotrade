@@ -58,6 +58,9 @@ class Poloniex(exchange.Exchange):
         })
         return res
 
+    def get_fee(self):
+        return float(self.private.returnFeeInfo()['takerFee'])
+
     @cached_property_with_ttl(ttl=60)
     def _ticker(self):
         return self.public.returnTicker()

@@ -78,3 +78,14 @@ class TestPoloniex(unittest.TestCase):
             self.plx._ticker()
         # second call hasn't called to external api due to cache
         m.assert_called_once()
+
+    def test_get_fee(self):
+        fee_info = {
+            "makerFee": "0.00140000",
+            "takerFee": "0.00240000",
+            "thirtyDayVolume": "612.00248891",
+            "nextTier": "1200.00000000"
+        }
+        with mock.patch.object(self.plx.private, 'returnFeeInfo',
+                               return_value=fee_info):
+            self.assertEqual(0.0024, self.plx.get_fee())

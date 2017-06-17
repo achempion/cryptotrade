@@ -42,6 +42,9 @@ class TestGetWorth(unittest.TestCase):
             else:  # BTC -> USD
                 return 2500
 
+        def get_fee(self):
+            return 0.0
+
         # needed to fulfill abstract interface
         def cancel_all_orders(self):
             return NotImplemented

@@ -25,11 +25,7 @@ def get_gold_total(targets, balances, rates, i):
         for currency in targets)
 
 
-def balance_trader(conf, balances, rates, i):
-    targets = conf['core']['target']
-    gold = conf['core']['gold']
-    fee = conf['core']['fee']
-
+def balance_trader(targets, gold, fee, balances, rates, i):
     gold_total = get_gold_total(targets, balances, rates, i)
 
     for currency, target in targets.items():
@@ -59,9 +55,11 @@ def balance_trader(conf, balances, rates, i):
                   (alt_diff, currency, gold_bought, gold, rate))
 
 
-def noop_trader(conf, balances, rates, i): pass
+def noop_trader(targets, gold, fee, balances, rates, i): pass
 
 
-def trade(conf, balances, rates, trader_func):
+def trade(targets, gold, fee, balances, rates, trader_func):
+    # todo: consider making trade() receive exchange object to extract fees and
+    # balances (if not passed) and maybe rates
     for i in range(len(rates)):
-        trader_func(conf, balances, rates, i)
+        trader_func(targets, gold, fee, balances, rates, i)

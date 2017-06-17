@@ -27,7 +27,6 @@ from cryptotrade import trader
 
 class TestNoopTrader(unittest.TestCase):
     def test_noop_trader_does_nothing(self):
-        conf = object()
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
         orig_balances = balances.copy()
         fake_rates = {
@@ -36,26 +35,24 @@ class TestNoopTrader(unittest.TestCase):
             ]
             for currency in balances.keys()
         }
-        trader.trade(conf, balances, fake_rates, trader.noop_trader)
+        trader.trade('faketargets', 'fakegold', 'fakefee',
+                     balances, fake_rates, trader.noop_trader)
         self.assertEqual(orig_balances, balances)
 
 
 class TestBalanceTrader(unittest.TestCase):
     def test_balance_trader_balances(self):
-        conf = {
-            'core': {
-                'fee': 0.0,
-                'gold': 'BTC',
-                'target': {'ETH': 0.5, 'BTC': 0.25, 'LTC': 0.25},
-            }
-        }
+        targets = {'ETH': 0.5, 'BTC': 0.25, 'LTC': 0.25}
+        gold = 'BTC'
+        fee = 0.0  # to simplify matters
         balances = {'BTC': 1000.0, 'ETH': 0.0, 'LTC': 0.0}
         fake_rates = {
             'ETH': [0.5,  1.0, 0.5],
             'LTC': [0.5, 0.25, 1.0],
             'BTC': [1.0,  1.0, 1.0],
         }
-        trader.trade(conf, balances, fake_rates, trader.balance_trader)
+        trader.trade(
+            targets, gold, fee, balances, fake_rates, trader.balance_trader)
 
         # -> BTC = 1000, ETH = 0, LTC = 0 (total 1000 BTC)
         #
@@ -80,12 +77,14 @@ class TestTrade(unittest.TestCase):
             ]
             for currency in balances.keys()
         }
-        conf = object()
+        targets = 'faketargets'
+        gold = 'fakegold'
+        fee = 'fakefee'
         trader_func = mock.Mock()
-        trader.trade(conf, balances, fake_rates, trader_func)
+        trader.trade(targets, gold, fee, balances, fake_rates, trader_func)
         trader_func.assert_has_calls(
             [
-                mock.call(conf, balances, fake_rates, i)
+                mock.call(targets, gold, fee, balances, fake_rates, i)
                 for i in range(len(fake_rates))
             ])
         self.assertEqual(len(fake_rates), trader_func.call_count)
