@@ -18,18 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import configparser
+import yaml
 
 
 _SUPPORTED_SECTIONS = ('core', 'poloniex',)
 
 
 def get_config(filename):
-    config = configparser.ConfigParser()
-    config.read(filename)
+    with open(filename, 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
     # filter out unknown sections
     return {
-        section: dict(config[section])
-        for section in _SUPPORTED_SECTIONS
-        if section in config and config[section]
+        k: v for k, v in cfg.items()
+        if k in _SUPPORTED_SECTIONS
     }

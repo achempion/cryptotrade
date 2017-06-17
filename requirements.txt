@@ -1,3 +1,4 @@
 cached_property
 cliff
 poloniex
+PyYAML

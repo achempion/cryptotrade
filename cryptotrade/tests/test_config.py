@@ -38,13 +38,13 @@ class TestGetConfig(unittest.TestCase):
 
     def test_file_with_ini_contents(self):
         contents = (
-            '[core]\n'
-            'opt0 = val0\n'
-            '[poloniex]\n'
-            'opt1 = val1\n'
-            'opt2 = val2\n'
-            '[unknown]\n'
-            'opt3 = val3\n'
+            'core:\n'
+            '    opt0: val0\n'
+            'poloniex:\n'
+            '    opt1: val1\n'
+            '    opt2: val2\n'
+            'unknown:\n'
+            '    opt3: val3\n'
         )
         with open(self.fname, 'w') as f:
             f.write(contents)
