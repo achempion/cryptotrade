@@ -29,9 +29,8 @@ def pamr_trader(targets, gold, fee, balances, rates, i, state):
     prev_gold_worth = state or 0
     # if the return is below threshold, fall back to passive strategy
     gold_total = get_gold_total(targets, balances, rates, i)
-    # 0.986 shows a better result for some reason, need to investigate why
-    if prev_gold_worth >= gold_total * 0.986:
-        print('market in downturn, do nothing')
+    # todo: explore other coefficient beyond 1.0
+    if prev_gold_worth >= gold_total:
         return gold_total
 
     balance_trader(targets, gold, fee, balances, rates, i, None)
