@@ -73,7 +73,7 @@ class TestTrade(unittest.TestCase):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
         fake_rates = {
             currency: [
-                random.random() for i in range(100)
+                random.random() for i in range(5)
             ]
             for currency in balances.keys()
         }
