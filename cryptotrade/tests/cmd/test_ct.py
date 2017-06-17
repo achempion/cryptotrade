@@ -23,8 +23,6 @@ import unittest
 from cryptotrade.cmd import ct
 
 
-class Test_ParseArgs(unittest.TestCase):
-    def test_custom_config_file(self):
-        filename = 'other'
-        args = ct._parse_args(['-c', filename])
-        self.assertEqual(filename, args.config_file)
+# todo: actually cover the module with tests
+class TestMain(unittest.TestCase):
+    pass
