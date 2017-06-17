@@ -35,7 +35,7 @@ class TestNoopTrader(unittest.TestCase):
             ]
             for currency in balances.keys()
         }
-        trader.trade('faketargets', 'fakegold', 'fakefee',
+        trader.trade('faketargets', 'BTC', 'fakefee',
                      balances, fake_rates, trader.noop_trader)
         self.assertEqual(orig_balances, balances)
 
@@ -78,13 +78,13 @@ class TestTrade(unittest.TestCase):
             for currency in balances.keys()
         }
         targets = 'faketargets'
-        gold = 'fakegold'
+        gold = 'BTC'
         fee = 'fakefee'
         trader_func = mock.Mock()
         trader.trade(targets, gold, fee, balances, fake_rates, trader_func)
         trader_func.assert_has_calls(
             [
                 mock.call(targets, gold, fee, balances, fake_rates, i)
-                for i in range(len(fake_rates))
+                for i in range(len(fake_rates[gold]))
             ])
-        self.assertEqual(len(fake_rates), trader_func.call_count)
+        self.assertEqual(len(fake_rates[gold]), trader_func.call_count)

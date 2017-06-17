@@ -58,12 +58,10 @@ def main(args=sys.argv[1:]):
 
     gold = 'BTC'
     balances = ex.get_balances()
-    print('including %s' % dict(balances))
     rates = ex.get_closing_rates(
         gold, list(conf['core']['target'].keys()),
         60 * 60 * 4,  # use 4h candlesticks
         in_past, now)
-    print conf['core']['target']
     trader.trade(
         conf['core']['target'], gold, ex.get_fee(),
         balances, rates, trader.balance_trader)

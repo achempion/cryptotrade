@@ -61,5 +61,5 @@ def noop_trader(targets, gold, fee, balances, rates, i): pass
 def trade(targets, gold, fee, balances, rates, trader_func):
     # todo: consider making trade() receive exchange object to extract fees and
     # balances (if not passed) and maybe rates
-    for i in range(len(rates)):
+    for i in range(len(rates[gold])):
         trader_func(targets, gold, fee, balances, rates, i)
