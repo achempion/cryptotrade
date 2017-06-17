@@ -62,11 +62,8 @@ class CtApp(App):
         return parser
 
     def prepare_to_run_command(self, cmd):
-        # todo: figure out how to pass the configuration into subcommands
         self.cfg = config.get_config(
             getattr(self.options, 'config_file', CONFIG_PATH))
-        # todo: remove logging
-        LOG.info('Configuration: %s' % self.cfg)
 
 
 # todo: kill
