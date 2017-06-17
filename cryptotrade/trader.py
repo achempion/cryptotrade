@@ -25,7 +25,20 @@ def get_gold_total(targets, balances, rates, i):
         for currency in targets)
 
 
-def balance_trader(targets, gold, fee, balances, rates, i):
+def pamr_trader(targets, gold, fee, balances, rates, i, state):
+    prev_gold_worth = state or 0
+    # if the return is below threshold, fall back to passive strategy
+    gold_total = get_gold_total(targets, balances, rates, i)
+    # 0.986 shows a better result for some reason, need to investigate why
+    if prev_gold_worth >= gold_total * 0.986:
+        print('market in downturn, do nothing')
+        return gold_total
+
+    balance_trader(targets, gold, fee, balances, rates, i, None)
+    return get_gold_total(targets, balances, rates, i)
+
+
+def balance_trader(targets, gold, fee, balances, rates, i, state):
     gold_total = get_gold_total(targets, balances, rates, i)
 
     for currency, target in targets.items():
@@ -55,11 +68,12 @@ def balance_trader(targets, gold, fee, balances, rates, i):
                   (alt_diff, currency, gold_bought, gold, rate))
 
 
-def noop_trader(targets, gold, fee, balances, rates, i): pass
+def noop_trader(targets, gold, fee, balances, rates, i, state): pass
 
 
 def trade(targets, gold, fee, balances, rates, trader_func):
     # todo: consider making trade() receive exchange object to extract fees and
     # balances (if not passed) and maybe rates
+    state = None
     for i in range(len(rates[gold])):
-        trader_func(targets, gold, fee, balances, rates, i)
+        state = trader_func(targets, gold, fee, balances, rates, i, state)
