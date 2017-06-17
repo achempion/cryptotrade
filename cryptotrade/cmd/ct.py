@@ -27,9 +27,24 @@ import os
 import sys
 import time
 
+from cliff.app import App
+from cliff.commandmanager import CommandManager
+
 from cryptotrade import config
 from cryptotrade import polo_exchange
 from cryptotrade import trader
+from cryptotrade import version
+
+
+class CtApp(App):
+
+    def __init__(self):
+        super(CtApp, self).__init__(
+            description=sys.modules[__name__].__doc__,
+            version=version.get_version(),
+            command_manager=CommandManager('ct.cli'),
+            deferred_help=True,
+            )
 
 
 CONFIG_FILE = '.cryptotrade.conf'
@@ -42,6 +57,12 @@ def _parse_args(args):
         '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
         help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
     return parser.parse_args(args)
+
+
+# todo: replace ct once its features are incorporated into the new cli manager
+def new_main(argv=sys.argv[1:]):
+    app = CtApp()
+    return app.run(argv)
 
 
 def main(args=sys.argv[1:]):
