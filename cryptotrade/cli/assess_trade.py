@@ -66,7 +66,7 @@ class AssessTradeCommand(Lister):
         profit = (new_worth_btc - old_worth_btc) / old_worth_btc * 100
 
         return (
-            ('', 'Before', 'After'),
+            ('', 'HODL', 'w/strategy'),
             (('USD', old_worth_usd, new_worth_usd),
              ('BTC', old_worth_btc, new_worth_btc),
              ('%', '100%', '%s%%' % profit))
