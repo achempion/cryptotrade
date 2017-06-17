@@ -18,8 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 from cliff.command import Command
 
+
 class TestCommand(Command):
+
+    log = logging.getLogger(__name__)
+
     def take_action(self, parsed_args):
         pass

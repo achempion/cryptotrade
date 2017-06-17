@@ -23,6 +23,7 @@ cryptotrade, the cryptocurrency trading automation tool.
 """
 
 import argparse
+import logging
 import os
 import sys
 import time
@@ -34,6 +35,9 @@ from cryptotrade import config
 from cryptotrade import polo_exchange
 from cryptotrade import trader
 from cryptotrade import version
+
+
+LOG = logging.getLogger(__name__)
 
 
 # todo: maybe move somewhere else
@@ -56,6 +60,13 @@ class CtApp(App):
             '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
             help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
         return parser
+
+    def prepare_to_run_command(self, cmd):
+        # todo: figure out how to pass the configuration into subcommands
+        self.cfg = config.get_config(
+            getattr(self.options, 'config_file', CONFIG_PATH))
+        # todo: remove logging
+        LOG.info('Configuration: %s' % self.cfg)
 
 
 # todo: kill
