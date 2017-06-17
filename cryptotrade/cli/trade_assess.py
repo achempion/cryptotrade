@@ -55,11 +55,15 @@ class TradeAssessCommand(Lister):
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
 
-        # todo: make sure it adds up to 1.0
         targets = {}
+        total_weight = 0
         for target in parsed_args.targets:
             currency, weight = target.split('=')
-            targets[currency] = float(weight)
+            weight = float(weight)
+            total_weight += weight
+            targets[currency] = weight
+        if total_weight != 1.0:
+            raise RuntimeError("error: weights don't add up to 1")
 
         rates = ex.get_closing_rates(
             gold, list(targets.keys()),
