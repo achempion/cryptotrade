@@ -22,18 +22,14 @@
 cryptotrade, the cryptocurrency trading automation tool.
 """
 
-import argparse
 import logging
 import os
 import sys
-import time
 
 from cliff.app import App
 from cliff.commandmanager import CommandManager
 
 from cryptotrade import config
-from cryptotrade import polo_exchange
-from cryptotrade import trader
 from cryptotrade import version
 
 

@@ -20,8 +20,6 @@
 
 import unittest
 
-from cryptotrade.cmd import ct
-
 
 # todo: actually cover the module with tests
 class TestMain(unittest.TestCase):
