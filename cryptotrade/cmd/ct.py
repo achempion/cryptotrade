@@ -49,8 +49,9 @@ def main(args=sys.argv[1:]):
     conf = config.get_config(args.config_file)
     ex = polo_exchange.Poloniex(conf)
 
+    old_worth = ex.get_worth('BTC')
     print('Your portfolio worth is:')
-    print(' * %.4f BTC' % ex.get_worth('BTC'))
+    print(' * %.4f BTC' % old_worth)
     print(' * %.4f USD' % ex.get_worth('USDT'))
 
     now = time.time()
@@ -66,9 +67,11 @@ def main(args=sys.argv[1:]):
         conf['core']['target'], gold, ex.get_fee(),
         balances, rates, trader.balance_trader)
 
+    new_worth = ex.get_worth('BTC', balances=balances)
     print('Your portfolio is now worth:')
-    print(' * %.4f BTC' % ex.get_worth('BTC', balances=balances))
+    print(' * %.4f BTC' % new_worth)
     print(' * %.4f USD' % ex.get_worth('USDT', balances=balances))
     print('including %s' % dict(balances))
+    print('profit = %.2f%%' % ((new_worth - old_worth) / old_worth * 100))
 
     return 0
