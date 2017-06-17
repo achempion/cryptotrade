@@ -18,48 +18,63 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-def get_gold_total(targets, balances, rates, i):
-    return sum(
-        balances[currency] * rates[currency][i]
-        for currency in targets)
+import abc
 
 
-def balance_trader(targets, gold, fee, balances, rates, i):
-    gold_total = get_gold_total(targets, balances, rates, i)
+class Strategy(object):
 
-    for currency, target in targets.items():
-        if currency == gold:
-            continue
+    # todo: use six for metaclasses to work for both pythons
+    __metaclass__ = abc.ABCMeta
 
-        rate = rates[currency][i]
-        gold_worth = balances[currency] * rate
-        gold_target = gold_total * target
-        gold_diff = abs(gold_target - gold_worth)
-        alt_diff = gold_diff / rate
+    # todo: pick better names for public entry points
+    @abc.abstractmethod
+    def trader(self, targets, gold, fee, balances, rates, i):
+        pass
 
-        # todo: use fuzzy comparison
-        if gold_worth < gold_target:
-            gold_sold = gold_diff * (1 + fee)
-            balances[currency] += alt_diff
-            balances[gold] -= gold_sold
-            # todo: actually trade
-            print('buy %.4f %s for %.4f %s (rate: %.6f)' %
-                  (alt_diff, currency, gold_sold, gold, rate))
-        elif gold_worth > gold_target:
-            gold_bought = gold_diff * (1 - fee)
-            balances[currency] -= alt_diff
-            balances[gold] += gold_bought
-            # todo: actually trade
-            print('sell %.4f %s for %.4f %s (rate: %.6f)' %
-                  (alt_diff, currency, gold_bought, gold, rate))
+    def trade(self, targets, gold, fee, balances, rates):
+        # todo: consider making trade() receive exchange object to extract fees
+        # and balances (if not passed) and maybe rates
+        for i in range(len(rates[gold])):
+            self.trader(targets, gold, fee, balances, rates, i)
 
 
-def noop_trader(targets, gold, fee, balances, rates, i): pass
+class BCRStrategy(Strategy):
+
+    def get_gold_total(self, targets, balances, rates, i):
+        return sum(
+            balances[currency] * rates[currency][i]
+            for currency in targets)
+
+    def trader(self, targets, gold, fee, balances, rates, i):
+        gold_total = self.get_gold_total(targets, balances, rates, i)
+
+        for currency, target in targets.items():
+            if currency == gold:
+                continue
+
+            rate = rates[currency][i]
+            gold_worth = balances[currency] * rate
+            gold_target = gold_total * target
+            gold_diff = abs(gold_target - gold_worth)
+            alt_diff = gold_diff / rate
+
+            # todo: use fuzzy comparison
+            if gold_worth < gold_target:
+                gold_sold = gold_diff * (1 + fee)
+                balances[currency] += alt_diff
+                balances[gold] -= gold_sold
+                # todo: actually trade
+                print('buy %.4f %s for %.4f %s (rate: %.6f)' %
+                      (alt_diff, currency, gold_sold, gold, rate))
+            elif gold_worth > gold_target:
+                gold_bought = gold_diff * (1 - fee)
+                balances[currency] -= alt_diff
+                balances[gold] += gold_bought
+                # todo: actually trade
+                print('sell %.4f %s for %.4f %s (rate: %.6f)' %
+                      (alt_diff, currency, gold_bought, gold, rate))
 
 
-def trade(targets, gold, fee, balances, rates, trader_func):
-    # todo: consider making trade() receive exchange object to extract fees and
-    # balances (if not passed) and maybe rates
-    for i in range(len(rates[gold])):
-        trader_func(targets, gold, fee, balances, rates, i)
+class NoopStrategy(Strategy):
+    def trader(self, targets, gold, fee, balances, rates, i):
+        pass

@@ -98,9 +98,8 @@ class TradeAssessCommand(Lister):
             in_past, now)
 
         # todo: allow to pick strategy via cli
-        trader.trade(
-            targets, gold, ex.get_fee(),
-            balances, rates, trader.balance_trader)
+        strategy = trader.BCRStrategy()
+        strategy.trade(targets, gold, ex.get_fee(), balances, rates)
 
         new_worth_btc = ex.get_worth('BTC', balances=balances)
         new_worth_usd = ex.get_worth('USD', balances=balances)
