@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import collections
 import time
 
 from cliff.lister import Lister
@@ -30,6 +31,12 @@ class TradeAssessCommand(Lister):
 
     def get_parser(self, prog_name):
         parser = super(TradeAssessCommand, self).get_parser(prog_name)
+        parser.add_argument(
+            '-b',
+            dest='balances',
+            action='append',
+            metavar='CURRENCY=AMOUNT',
+            help='currency balances')
         parser.add_argument(
             '-t',
             dest='targets',
@@ -48,9 +55,15 @@ class TradeAssessCommand(Lister):
 
         gold = 'BTC'
 
-        # todo: allow to specify balance via cli
         # todo: allow to specify candlestick length via cli
-        balances = ex.get_balances()
+        if parsed_args.balances:
+            balances = collections.defaultdict(float)
+            for balance in parsed_args.balances:
+                currency, amount = balance.split('=')
+                amount = float(amount)
+                balances[currency] = amount
+        else:
+            balances = ex.get_balances()
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
