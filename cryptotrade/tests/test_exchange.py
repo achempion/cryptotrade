@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import random
 import unittest
 
 from cryptotrade import exchange
@@ -45,9 +46,11 @@ class TestGetWorth(unittest.TestCase):
         def cancel_all_orders(self):
             return NotImplemented
 
-        # needed to fulfill abstract interface
         def get_candlesticks(self, from_, to_, period, start, end):
-            return NotImplemented
+            return [
+                {'close': random.random()}
+                for _ in range(start, end, period)
+            ]
 
     def setUp(self):
         super(TestGetWorth, self).setUp()
@@ -66,3 +69,15 @@ class TestGetWorth(unittest.TestCase):
         balances = {'BTC': 10, 'ETH': 200, 'XMR': 30}
         res = self.exchange.get_worth('BTC', balances=balances)
         self.assertEqual(15, res)
+
+    def test_get_worth_custom_balances_usd(self):
+        balances = {'BTC': 10, 'ETH': 200, 'XMR': 30}
+        res = self.exchange.get_worth('USD', balances=balances)
+        self.assertEqual(15 * 2500, res)
+
+    def test_get_closing_rates(self):
+        res = self.exchange.get_closing_rates(
+            'BTC', ('XMR', 'ETH'), 300, 0, 0 + 1500)
+        for k, v in res.items():
+            self.assertEqual(1500/300, len(v))
+        self.assertEqual([1] * len(v), res['BTC'])

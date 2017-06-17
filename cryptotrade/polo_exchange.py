@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import collections
+
 from cached_property import cached_property_with_ttl
 from poloniex import poloniex as plx
 
@@ -49,10 +51,12 @@ class Poloniex(exchange.Exchange):
 
     def get_balances(self):
         balances = self.private.returnBalances()
-        return {
+        res = collections.defaultdict(float)
+        res.update({
             # filter out currencies that we don't own
             k: v for k, v in balances.items() if v
-        }
+        })
+        return res
 
     @cached_property_with_ttl(ttl=60)
     def _ticker(self):

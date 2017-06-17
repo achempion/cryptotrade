@@ -19,9 +19,49 @@
 # SOFTWARE.
 
 
-def noop_trader(balances, candles, i): pass
+def get_gold_total(targets, balances, rates, i):
+    return sum(
+        balances[currency] * rates[currency][i]
+        for currency in targets)
 
 
-def trade(balances, candles, trader_func):
-    for i in range(len(candles)):
-        trader_func(balances, candles, i)
+def balance_trader(conf, balances, rates, i):
+    targets = conf['core']['target']
+    gold = conf['core']['gold']
+    fee = conf['core']['fee']
+
+    gold_total = get_gold_total(targets, balances, rates, i)
+
+    for currency, target in targets.items():
+        if currency == gold:
+            continue
+
+        rate = rates[currency][i]
+        gold_worth = balances[currency] * rate
+        gold_target = gold_total * target
+        gold_diff = abs(gold_target - gold_worth)
+        alt_diff = gold_diff / rate
+
+        # todo: use fuzzy comparison
+        if gold_worth < gold_target:
+            gold_sold = gold_diff * (1 + fee)
+            balances[currency] += alt_diff
+            balances[gold] -= gold_sold
+            # todo: actually trade
+            print('buy %.4f %s for %.4f %s (rate: %.6f)' %
+                  (alt_diff, currency, gold_sold, gold, rate))
+        elif gold_worth > gold_target:
+            gold_bought = gold_diff * (1 - fee)
+            balances[currency] -= alt_diff
+            balances[gold] += gold_bought
+            # todo: actually trade
+            print('sell %.4f %s for %.4f %s (rate: %.6f)' %
+                  (alt_diff, currency, gold_bought, gold, rate))
+
+
+def noop_trader(conf, balances, rates, i): pass
+
+
+def trade(conf, balances, rates, trader_func):
+    for i in range(len(rates)):
+        trader_func(conf, balances, rates, i)

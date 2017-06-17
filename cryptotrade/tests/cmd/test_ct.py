@@ -40,6 +40,8 @@ class TestMain(unittest.TestCase):
         contents = (
             '[core]\n'
             'target=ETH=0.5;BTC=0.5\n'
+            'gold=BTC\n'
+            'fee=1.0025\n'
             '[poloniex]\n'
             'api_key = fakekey\n'
             'api_secret = fakesecret\n'

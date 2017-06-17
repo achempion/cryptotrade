@@ -25,9 +25,11 @@ cryptotrade, the cryptocurrency trading automation tool.
 import argparse
 import os
 import sys
+import time
 
 from cryptotrade import config
 from cryptotrade import polo_exchange
+from cryptotrade import trader
 
 
 CONFIG_FILE = '.cryptotrade.conf'
@@ -50,5 +52,20 @@ def main(args=sys.argv[1:]):
     print('Your portfolio worth is:')
     print(' * %.4f BTC' % ex.get_worth('BTC'))
     print(' * %.4f USD' % ex.get_worth('USDT'))
+
+    now = time.time()
+    in_past = now - 60 * 60 * 24 * 180  # 180 days
+
+    gold = 'BTC'
+    balances = ex.get_balances()
+    rates = ex.get_closing_rates(
+        gold, list(conf['core']['target'].keys()),
+        60 * 60 * 4,  # use 4h candlesticks
+        in_past, now)
+    trader.trade(conf, balances, rates, trader.balance_trader)
+
+    print('Your portfolio is now worth:')
+    print(' * %.4f BTC' % ex.get_worth('BTC', balances=balances))
+    print(' * %.4f USD' % ex.get_worth('USDT', balances=balances))
 
     return 0

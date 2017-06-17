@@ -48,7 +48,8 @@ class Exchange(object):
         balances = balances or self.get_balances()
 
         if gold == 'USD':
-            return self.get_worth('BTC') * self.get_rate('USD', 'BTC')
+            return (self.get_worth('BTC', balances=balances) *
+                    self.get_rate('USD', 'BTC'))
 
         worth = 0
         for currency, amount in balances.items():
@@ -58,3 +59,19 @@ class Exchange(object):
                 converted_amount = amount * self.get_rate(gold, currency)
                 worth += converted_amount
         return worth
+
+    def get_closing_rates(self, gold, other, period, start, end):
+        res = {
+            currency: [
+                candle['close']
+                for candle in self.get_candlesticks(
+                    gold, currency, period, start, end)
+            ]
+            for currency in other
+            if currency != gold
+        }
+        for k, v in res.items():
+            num_of_rates = len(v)
+            break
+        res[gold] = [1] * num_of_rates
+        return res
