@@ -18,37 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import mock
-import os
-import tempfile
 import unittest
 
 from cryptotrade.cmd import ct
-
-
-class TestMain(unittest.TestCase):
-    def setUp(self):
-        super(TestMain, self).setUp()
-        self.fp, self.fname = tempfile.mkstemp()
-        os.close(self.fp)
-
-    def tearDown(self):
-        os.remove(self.fname)
-        super(TestMain, self).tearDown()
-
-    def test_main(self):
-        contents = (
-            '[core]\n'
-            'target=ETH=0.5;BTC=0.5\n'
-            'gold=BTC\n'
-            '[poloniex]\n'
-            'api_key = fakekey\n'
-            'api_secret = fakesecret\n'
-        )
-        with open(self.fname, 'w') as f:
-            f.write(contents)
-        with mock.patch('poloniex.Poloniex._private'):
-            self.assertEqual(0, ct.main(args=['-c', self.fname]))
 
 
 class Test_ParseArgs(unittest.TestCase):
