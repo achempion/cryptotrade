@@ -81,5 +81,5 @@ class TradeAssessCommand(Lister):
             ('', 'HODL', 'w/strategy'),
             (('USD', old_worth_usd, new_worth_usd),
              ('BTC', old_worth_btc, new_worth_btc),
-             ('%', '100%', '%s%%' % profit))
+             ('%', '100%', '%s%%' % (100 + profit)))
         )
