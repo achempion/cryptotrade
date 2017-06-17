@@ -18,14 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import logging
 from cliff.lister import Lister
 from cryptotrade import polo_exchange
 
 
 class BalanceCommand(Lister):
-
-    log = logging.getLogger(__name__)
+    '''list balance for each currency'''
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command

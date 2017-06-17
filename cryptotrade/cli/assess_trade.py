@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import logging
 import time
 
 from cliff.lister import Lister
@@ -27,8 +26,7 @@ from cryptotrade import trader
 
 
 class AssessTradeCommand(Lister):
-
-    log = logging.getLogger(__name__)
+    '''assess trade strategy'''
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
