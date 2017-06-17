@@ -38,6 +38,13 @@ class TradeAssessCommand(Lister):
             metavar='CURRENCY=AMOUNT',
             help='currency balances')
         parser.add_argument(
+            '-p',
+            dest='period',
+            metavar='DAYS',
+            required=True,
+            type=float,
+            help='past time period to assess')
+        parser.add_argument(
             '-t',
             dest='targets',
             action='append',
@@ -49,9 +56,8 @@ class TradeAssessCommand(Lister):
         # todo: abstract exchange from the command
         ex = polo_exchange.Poloniex(self.app.cfg)
 
-        # todo: allow to specify period via cli
         now = time.time()
-        in_past = now - 60 * 60 * 24 * 180  # 180 days
+        in_past = now - 60 * 60 * 24 * parsed_args.period
 
         gold = 'BTC'
 
