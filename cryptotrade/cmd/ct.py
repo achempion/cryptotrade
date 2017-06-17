@@ -66,49 +66,6 @@ class CtApp(App):
             getattr(self.options, 'config_file', CONFIG_PATH))
 
 
-# todo: kill
-def _parse_args(args):
-    parser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
-    parser.add_argument(
-        '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
-        help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
-    return parser.parse_args(args)
-
-
-# todo: replace ct once its features are incorporated into the new cli manager
-def new_main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]):
     app = CtApp()
     return app.run(argv)
-
-
-def main(args=sys.argv[1:]):
-    args = _parse_args(args=args)
-    conf = config.get_config(args.config_file)
-    ex = polo_exchange.Poloniex(conf)
-
-    old_worth = ex.get_worth('BTC')
-    print('Your portfolio worth is:')
-    print(' * %.4f BTC' % old_worth)
-    print(' * %.4f USD' % ex.get_worth('USDT'))
-
-    now = time.time()
-    in_past = now - 60 * 60 * 24 * 180  # 180 days
-
-    gold = 'BTC'
-    balances = ex.get_balances()
-    rates = ex.get_closing_rates(
-        gold, list(conf['core']['target'].keys()),
-        60 * 60 * 4,  # use 4h candlesticks
-        in_past, now)
-    trader.trade(
-        conf['core']['target'], gold, ex.get_fee(),
-        balances, rates, trader.balance_trader)
-
-    new_worth = ex.get_worth('BTC', balances=balances)
-    print('Your portfolio is now worth:')
-    print(' * %.4f BTC' % new_worth)
-    print(' * %.4f USD' % ex.get_worth('USDT', balances=balances))
-    print('including %s' % dict(balances))
-    print('profit = %.2f%%' % ((new_worth - old_worth) / old_worth * 100))
-
-    return 0
