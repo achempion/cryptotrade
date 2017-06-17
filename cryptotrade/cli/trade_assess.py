@@ -25,7 +25,7 @@ from cryptotrade import polo_exchange
 from cryptotrade import trader
 
 
-class AssessTradeCommand(Lister):
+class TradeAssessCommand(Lister):
     '''assess trade strategy'''
 
     def take_action(self, parsed_args):
