@@ -28,6 +28,16 @@ from cryptotrade import trader
 class TradeAssessCommand(Lister):
     '''assess trade strategy'''
 
+    def get_parser(self, prog_name):
+        parser = super(TradeAssessCommand, self).get_parser(prog_name)
+        parser.add_argument(
+            '-t',
+            dest='targets',
+            action='append',
+            metavar='CURRENCY=WEIGHT',
+            help='target weight per currency')
+        return parser
+
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
         ex = polo_exchange.Poloniex(self.app.cfg)
@@ -40,13 +50,17 @@ class TradeAssessCommand(Lister):
 
         # todo: allow to specify balance via cli
         # todo: allow to specify candlestick length via cli
-        # todo: allow to specify targets via cli
         balances = ex.get_balances()
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
 
-        targets = self.app.cfg['core']['target']
+        # todo: make sure it adds up to 1.0
+        targets = {}
+        for target in parsed_args.targets:
+            currency, weight = target.split('=')
+            targets[currency] = float(weight)
+
         rates = ex.get_closing_rates(
             gold, list(targets.keys()),
             60 * 60 * 4,  # use 4h candlesticks

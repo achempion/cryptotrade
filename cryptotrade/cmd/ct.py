@@ -53,7 +53,10 @@ class CtApp(App):
     def build_option_parser(self, *args, **kwargs):
         parser = super(CtApp, self).build_option_parser(*args, **kwargs)
         parser.add_argument(
-            '-c', dest='config_file', metavar='FILE', default=CONFIG_PATH,
+            '-c',
+            dest='config_file',
+            metavar='FILE',
+            default=CONFIG_PATH,
             help='configuration file to load (default: ~/%s)' % CONFIG_FILE)
         return parser
 
