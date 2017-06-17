@@ -84,8 +84,7 @@ class TestTrade(unittest.TestCase):
         trader.trade(targets, gold, fee, balances, fake_rates, trader_func)
         trader_func.assert_has_calls(
             [
-                mock.call(
-                    targets, gold, fee, balances, fake_rates, i, mock.ANY)
+                mock.call(targets, gold, fee, balances, fake_rates, i)
                 for i in range(len(fake_rates[gold]))
             ])
         self.assertEqual(len(fake_rates[gold]), trader_func.call_count)
