@@ -78,6 +78,7 @@ class TestStrategy(unittest.TestCase):
 
         def trader(self, *args, **kwargs):
             self.calls.append((args, kwargs))
+            return []
 
     def test_trade_number_of_callbacks(self):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}

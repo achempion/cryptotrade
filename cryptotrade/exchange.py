@@ -50,6 +50,14 @@ class Exchange(object):
     def get_fee(self):
         return NotImplemented
 
+    @abc.abstractmethod
+    def buy(self, from_, to_, rate, amount):
+        return NotImplemented
+
+    @abc.abstractmethod
+    def sell(self, from_, to_, rate, amount):
+        return NotImplemented
+
     def get_worth(self, gold, balances=None):
         balances = balances or self.get_balances()
 

@@ -18,25 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import collections
 import time
 
 from cliff.lister import Lister
+
 from cryptotrade import polo_exchange
 from cryptotrade import trader
+from cryptotrade.cli import trade_base
 
 
-class TradeAssessCommand(Lister):
+class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
     '''assess trade strategy'''
 
     def get_parser(self, prog_name):
         parser = super(TradeAssessCommand, self).get_parser(prog_name)
-        parser.add_argument(
-            '-b',
-            dest='balances',
-            action='append',
-            metavar='CURRENCY=AMOUNT',
-            help='currency balances')
         parser.add_argument(
             '-i',
             dest='interval',
@@ -52,17 +47,6 @@ class TradeAssessCommand(Lister):
             required=True,
             type=float,
             help='past time period to assess')
-        parser.add_argument(
-            '-s',
-            dest='strategy',
-            choices=trader.list_strategy_names(),
-            help='trading strategy to assess')
-        parser.add_argument(
-            '-t',
-            dest='targets',
-            action='append',
-            metavar='CURRENCY=WEIGHT',
-            help='target weight per currency')
         return parser
 
     def take_action(self, parsed_args):
@@ -74,24 +58,8 @@ class TradeAssessCommand(Lister):
 
         gold = 'BTC'
 
-        targets = {}
-        total_weight = 0
-        for target in parsed_args.targets:
-            currency, weight = target.split('=')
-            weight = float(weight)
-            total_weight += weight
-            targets[currency] = weight
-        if total_weight != 1.0:
-            raise RuntimeError("error: weights don't add up to 1")
-
-        if parsed_args.balances:
-            balances = collections.defaultdict(float)
-            for balance in parsed_args.balances:
-                currency, amount = balance.split('=')
-                amount = float(amount)
-                balances[currency] = amount
-        else:
-            balances = ex.get_balances()
+        targets = self.get_targets(parsed_args)
+        balances = self.get_balances(ex, parsed_args)
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)

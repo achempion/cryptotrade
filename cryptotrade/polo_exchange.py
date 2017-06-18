@@ -68,6 +68,8 @@ class Poloniex(exchange.Exchange):
         return self.public.returnTicker()
 
     def get_rate(self, from_, to_):
+        if from_ == to_:
+            return 1
         ticker = self._ticker
         from_ = from_ if from_ != 'USD' else 'USDT'
         pair = '%s_%s' % (from_, to_)
@@ -82,3 +84,17 @@ class Poloniex(exchange.Exchange):
         for currency_pair, orders_ in self.private.returnOpenOrders().items():
             for order in orders_:
                 self.private.cancelOrder(order['orderNumber'])
+
+    def buy(self, from_, to_, rate, amount):
+        # revisit: switch back to .sell api when poloniex library is released
+        # with: https://github.com/Aula13/poloniex/pull/1
+        currencyPair = '%s_%s' % (from_, to_)
+        return self.private._private(
+            'buy', currencyPair=currencyPair, rate=rate, amount=amount)
+
+    def sell(self, from_, to_, rate, amount):
+        # revisit: switch back to .sell api when poloniex library is released
+        # with: https://github.com/Aula13/poloniex/pull/1
+        currencyPair = '%s_%s' % (from_, to_)
+        return self.private._private(
+            'sell', currencyPair=currencyPair, rate=rate, amount=amount)

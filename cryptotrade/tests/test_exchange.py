@@ -55,6 +55,12 @@ class TestGetWorth(unittest.TestCase):
                 for _ in range(start, end, period)
             ]
 
+        def buy(self, from_, to_, rate, amount):
+            return random.randrange(100)
+
+        def sell(self, from_, to_, rate, amount):
+            return random.randrange(100)
+
     def setUp(self):
         super(TestGetWorth, self).setUp()
         config = object()

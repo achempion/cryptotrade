@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import abc
+import collections
 
 import six
 from stevedore.driver import DriverManager
@@ -26,6 +27,12 @@ from stevedore.extension import ExtensionManager
 
 
 STRATEGY_NAMESPACE = 'ct.strategies'
+
+SELL_OP = 'sell'
+BUY_OP = 'buy'
+
+TradeOp = collections.namedtuple(
+    'TradeOp', ('op', 'gold_amount', 'alt_amount', 'alt', 'rate'))
 
 
 def list_strategy_names():
@@ -47,8 +54,13 @@ class Strategy(object):
     def trade(self, targets, gold, fee, balances, rates):
         # todo: consider making trade() receive exchange object to extract fees
         # and balances (if not passed) and maybe rates
+        ops = []
         for i in range(len(rates[gold])):
-            self.trader(targets, gold, fee, balances, rates, i)
+            ops_ = self.trader(targets, gold, fee, balances, rates, i)
+            # make sure we buy all the needed gold first before trading it for
+            # other coins, otherwise we risk getting into negative territory
+            ops.append((i, sorted(ops_, key=lambda o: o.op == SELL_OP)))
+        return ops
 
 
 class BCRStrategy(Strategy):
@@ -59,6 +71,7 @@ class BCRStrategy(Strategy):
             for currency in targets)
 
     def trader(self, targets, gold, fee, balances, rates, i):
+        ops = []
         gold_total = self.get_gold_total(targets, balances, rates, i)
 
         for currency, target in targets.items():
@@ -76,18 +89,27 @@ class BCRStrategy(Strategy):
                 gold_sold = gold_diff * (1 + fee)
                 balances[currency] += alt_diff
                 balances[gold] -= gold_sold
-                # todo: actually trade
-                print('buy %.4f %s for %.4f %s (rate: %.6f)' %
-                      (alt_diff, currency, gold_sold, gold, rate))
+                ops.append(
+                    TradeOp(
+                        op=BUY_OP,
+                        gold_amount=gold_sold,
+                        alt_amount=alt_diff,
+                        alt=currency,
+                        rate=rate))
             elif gold_worth > gold_target:
                 gold_bought = gold_diff * (1 - fee)
                 balances[currency] -= alt_diff
                 balances[gold] += gold_bought
-                # todo: actually trade
-                print('sell %.4f %s for %.4f %s (rate: %.6f)' %
-                      (alt_diff, currency, gold_bought, gold, rate))
+                ops.append(
+                    TradeOp(
+                        op=SELL_OP,
+                        gold_amount=gold_bought,
+                        alt_amount=alt_diff,
+                        alt=currency,
+                        rate=rate))
+        return ops
 
 
 class NoopStrategy(Strategy):
     def trader(self, targets, gold, fee, balances, rates, i):
-        pass
+        return []
