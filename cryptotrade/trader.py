@@ -20,6 +20,7 @@
 
 import abc
 
+import six
 from stevedore.driver import DriverManager
 from stevedore.extension import ExtensionManager
 
@@ -35,10 +36,8 @@ def get_strategy(name):
     return DriverManager(STRATEGY_NAMESPACE, name, invoke_on_load=True).driver
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Strategy(object):
-
-    # todo: use six for metaclasses to work for both pythons
-    __metaclass__ = abc.ABCMeta
 
     # todo: pick better names for public entry points
     @abc.abstractmethod
