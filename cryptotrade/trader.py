@@ -109,11 +109,19 @@ class Strategy(object):
         ops = []
         balances = balances.copy()
         for i in range(len(rates[gold])):
+            # calculate new targets
             new_targets = self.get_targets(targets, gold, balances, rates, i)
+            assert \
+                sum(new_targets.values()) == 1.0, \
+                "new targets don't add up to 1.0"
+
+            # produce buy/sell operations based on current balance and targets
             ops_ = self.get_ops(new_targets, gold, fee, balances, rates, i)
+
             # make sure we buy all the needed gold first before trading it for
             # other coins, otherwise we risk getting into negative territory
             ops.append((i, sorted(ops_, key=lambda o: o.op == SELL_OP)))
+
             # adjust balances for next iteration
             balances = self.apply_ops(gold, balances, ops_)
         return ops, balances

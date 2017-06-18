@@ -87,15 +87,12 @@ class TestStrategy(unittest.TestCase):
 
     def test_trade_number_of_callbacks(self):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
+        targets = {'BTC': 0.5, 'ETH': 0.25, 'XMR': 0.25}
         fake_rates = {
             currency: [
                 random.random() for i in range(5)
             ]
             for currency in balances.keys()
-        }
-        targets = {
-           currency: random.random()
-           for currency in balances
         }
         gold = 'BTC'
         fee = 0.0025
