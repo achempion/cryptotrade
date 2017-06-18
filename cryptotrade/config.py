@@ -23,7 +23,7 @@ import yaml
 
 # todo: make it a tad smarter by loading the list of additional sections from
 # extension managers
-_SUPPORTED_SECTIONS = ('core', 'poloniex', 'coinbase')
+_SUPPORTED_SECTIONS = ('poloniex', 'coinbase')
 
 
 def get_config(filename):
