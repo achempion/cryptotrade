@@ -75,5 +75,5 @@ class BaseTradeCommand(Command):
                 amount = float(amount)
                 balances[currency] = amount
         else:
-            balances = exchange.get_global_balance()
+            balances = exchange.get_global_balance(self.app.cfg)
         return balances
