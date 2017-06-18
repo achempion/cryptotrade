@@ -23,6 +23,7 @@ import time
 from cliff.lister import Lister
 
 from cryptotrade._exchanges import polo
+from cryptotrade import exchange
 from cryptotrade import trader
 from cryptotrade.cli import trade_base
 
@@ -50,8 +51,7 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
         return parser
 
     def take_action(self, parsed_args):
-        # todo: abstract exchange from the command
-        ex = polo.Poloniex(self.app.cfg)
+        ex = exchange.get_exchange_by_name(self.app.cfg, parsed_args.exchange)
 
         now = time.time()
         in_past = now - 60 * 60 * 24 * parsed_args.period

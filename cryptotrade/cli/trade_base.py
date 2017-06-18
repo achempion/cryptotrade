@@ -21,6 +21,7 @@
 import collections
 
 from cliff.command import Command
+from cryptotrade import exchange
 from cryptotrade import trader
 
 
@@ -33,6 +34,12 @@ class BaseTradeCommand(Command):
             action='append',
             metavar='CURRENCY=AMOUNT',
             help='currency balances')
+        parser.add_argument(
+            '-e',
+            dest='exchange',
+            required=True,
+            choices=exchange.get_active_exchange_names(self.app.cfg),
+            help='exchange to trade on')
         parser.add_argument(
             '-s',
             dest='strategy',

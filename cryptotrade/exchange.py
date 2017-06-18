@@ -96,6 +96,13 @@ class Exchange(object):
         return res
 
 
+def get_active_exchange_names(conf):
+    mgr = EnabledExtensionManager(
+        'ct.exchanges',
+        lambda ext: ext.name in conf)
+    return [ext.name for ext in mgr.extensions]
+
+
 def get_active_exchanges(conf):
     mgr = EnabledExtensionManager(
         'ct.exchanges',
@@ -103,3 +110,14 @@ def get_active_exchanges(conf):
         invoke_on_load=True,
         invoke_args=(conf,))
     return [ext.obj for ext in mgr.extensions]
+
+
+def get_exchange_by_name(conf, name):
+    mgr = EnabledExtensionManager(
+        'ct.exchanges',
+        lambda ext: ext.name in conf,
+        invoke_on_load=True,
+        invoke_args=(conf,))
+    for ext in mgr.extensions:
+        if ext.name == name:
+            return ext.obj
