@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import abc
+import collections
 
 import six
 from stevedore.enabled import EnabledExtensionManager
@@ -103,21 +104,39 @@ def get_active_exchange_names(conf):
     return [ext.name for ext in mgr.extensions]
 
 
+_EXCHANGE_MANAGER = None
+
+
+def _get_exchange_manager(conf):
+    global _EXCHANGE_MANAGER
+    if _EXCHANGE_MANAGER is None:
+        _EXCHANGE_MANAGER = EnabledExtensionManager(
+            'ct.exchanges',
+            lambda ext: ext.name in conf,
+            invoke_on_load=True,
+            invoke_args=(conf,))
+    return _EXCHANGE_MANAGER
+
+
 def get_active_exchanges(conf):
-    mgr = EnabledExtensionManager(
-        'ct.exchanges',
-        lambda ext: ext.name in conf,
-        invoke_on_load=True,
-        invoke_args=(conf,))
-    return [ext.obj for ext in mgr.extensions]
+    return [
+        ext.obj
+        for ext in _get_exchange_manager(conf).extensions
+    ]
 
 
 def get_exchange_by_name(conf, name):
-    mgr = EnabledExtensionManager(
-        'ct.exchanges',
-        lambda ext: ext.name in conf,
-        invoke_on_load=True,
-        invoke_args=(conf,))
+    mgr = _get_exchange_manager(conf)
     for ext in mgr.extensions:
         if ext.name == name:
             return ext.obj
+
+
+def get_global_balance(conf):
+    exchanges = get_active_exchanges(conf)
+    balance_total = collections.defaultdict(float)
+    for ex in exchanges:
+        balances = ex.get_balances()
+        for currency, amount in balances.items():
+            balance_total[currency] += amount
+    return balance_total
