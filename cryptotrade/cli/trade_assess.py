@@ -54,6 +54,11 @@ class TradeAssessCommand(Lister):
             type=float,
             help='past time period to assess')
         parser.add_argument(
+            '-s',
+            dest='strategy',
+            choices=trader.list_strategy_names(),
+            help='trading strategy to assess')
+        parser.add_argument(
             '-t',
             dest='targets',
             action='append',
@@ -97,8 +102,7 @@ class TradeAssessCommand(Lister):
             parsed_args.interval,
             in_past, now)
 
-        # todo: allow to pick strategy via cli
-        strategy = trader.BCRStrategy()
+        strategy = trader.get_strategy(parsed_args.strategy)
         strategy.trade(targets, gold, ex.get_fee(), balances, rates)
 
         new_worth_btc = ex.get_worth('BTC', balances=balances)

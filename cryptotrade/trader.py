@@ -20,6 +20,20 @@
 
 import abc
 
+from stevedore.driver import DriverManager
+from stevedore.extension import ExtensionManager
+
+
+STRATEGY_NAMESPACE = 'ct.strategies'
+
+
+def list_strategy_names():
+    return ExtensionManager(STRATEGY_NAMESPACE).entry_points_names()
+
+
+def get_strategy(name):
+    return DriverManager(STRATEGY_NAMESPACE, name, invoke_on_load=True).driver
+
 
 class Strategy(object):
 

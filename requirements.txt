@@ -1,4 +1,5 @@
 cached_property
 cliff
 poloniex
+stevedore
 PyYAML
