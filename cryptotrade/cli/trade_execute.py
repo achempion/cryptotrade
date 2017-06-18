@@ -22,7 +22,6 @@
 from poloniex import exceptions as plx_exc
 
 from cryptotrade.cli import trade_base
-from cryptotrade._exchanges import polo
 from cryptotrade import exchange
 from cryptotrade import trader
 
