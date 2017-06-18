@@ -40,7 +40,6 @@ class TradeAssessCommand(Lister):
         parser.add_argument(
             '-i',
             dest='interval',
-            metavar='MINUTES',
             required=True,
             type=int,
             # todo: untangle from poloniex exchange
