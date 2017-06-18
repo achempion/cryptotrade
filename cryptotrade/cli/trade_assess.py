@@ -113,7 +113,7 @@ class TradeAssessCommand(Lister):
             profit = 0
 
         return (
-            ('', 'HODL', 'w/strategy'),
+            ('', '-', parsed_args.strategy),
             (('USD', old_worth_usd, new_worth_usd),
              ('BTC', old_worth_btc, new_worth_btc),
              ('%', '100%', '%s%%' % (100 + profit)))
