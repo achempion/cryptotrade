@@ -94,3 +94,11 @@ class TestGetWorth(unittest.TestCase):
         for k, v in res.items():
             self.assertEqual(1500/300, len(v))
         self.assertEqual([1] * len(v), res['BTC'])
+
+
+class TestGetActiveExchanges(unittest.TestCase):
+    def test_configured_exchange_is_returned(self):
+        conf = {'poloniex': {'api_key': 'fakekey', 'api_secret': 'fakesecret'}}
+        exchanges = exchange.get_active_exchanges(conf)
+        self.assertEqual(1, len(exchanges))
+        self.assertEqual('poloniex', exchanges[0].name)

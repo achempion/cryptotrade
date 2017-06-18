@@ -21,6 +21,7 @@
 import abc
 
 import six
+from stevedore.enabled import EnabledExtensionManager
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -93,3 +94,11 @@ class Exchange(object):
             break
         res[gold] = [1] * num_of_rates
         return res
+
+
+def get_active_exchanges(conf):
+    mgr = EnabledExtensionManager(
+        'ct.exchanges',
+        lambda ext: ext.name in conf,
+        invoke_args=(conf,))
+    return mgr.extensions
