@@ -22,7 +22,7 @@
 from poloniex import exceptions as plx_exc
 
 from cryptotrade.cli import trade_base
-from cryptotrade import polo_exchange
+from cryptotrade._exchanges import polo
 from cryptotrade import trader
 
 
@@ -40,7 +40,7 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
-        ex = polo_exchange.Poloniex(self.app.cfg)
+        ex = polo.Poloniex(self.app.cfg)
 
         gold = 'BTC'
 

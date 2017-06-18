@@ -1,5 +1,6 @@
 cached_property
 cliff
+coinbase
 poloniex
 PyYAML
 six

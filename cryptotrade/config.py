@@ -21,7 +21,9 @@
 import yaml
 
 
-_SUPPORTED_SECTIONS = ('core', 'poloniex',)
+# todo: make it a tad smarter by loading the list of additional sections from
+# extension managers
+_SUPPORTED_SECTIONS = ('core', 'poloniex', 'coinbase')
 
 
 def get_config(filename):

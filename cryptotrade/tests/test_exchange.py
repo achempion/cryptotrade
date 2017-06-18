@@ -22,7 +22,7 @@ import random
 import unittest
 
 from cryptotrade import exchange
-from cryptotrade import polo_exchange as plx
+from cryptotrade._exchanges import polo
 
 
 class TestGetWorth(unittest.TestCase):
@@ -102,4 +102,4 @@ class TestGetActiveExchanges(unittest.TestCase):
         conf = {'poloniex': {'api_key': 'fakekey', 'api_secret': 'fakesecret'}}
         exchanges = exchange.get_active_exchanges(conf)
         self.assertEqual(1, len(exchanges))
-        self.assertIsInstance(exchanges[0], plx.Poloniex)
+        self.assertIsInstance(exchanges[0], polo.Poloniex)

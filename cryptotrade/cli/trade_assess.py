@@ -22,7 +22,7 @@ import time
 
 from cliff.lister import Lister
 
-from cryptotrade import polo_exchange
+from cryptotrade._exchanges import polo
 from cryptotrade import trader
 from cryptotrade.cli import trade_base
 
@@ -38,7 +38,7 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
             required=True,
             type=int,
             # todo: untangle from poloniex exchange
-            choices=polo_exchange.Poloniex.CANDLESTICKS,
+            choices=polo.Poloniex.CANDLESTICKS,
             help='time interval between assessment iterations')
         parser.add_argument(
             '-p',
@@ -51,7 +51,7 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
-        ex = polo_exchange.Poloniex(self.app.cfg)
+        ex = polo.Poloniex(self.app.cfg)
 
         now = time.time()
         in_past = now - 60 * 60 * 24 * parsed_args.period

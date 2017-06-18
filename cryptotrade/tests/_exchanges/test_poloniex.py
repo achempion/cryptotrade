@@ -21,7 +21,7 @@
 import mock
 import unittest
 
-from cryptotrade import polo_exchange
+from cryptotrade._exchanges import polo
 
 
 class TestPoloniex(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestPoloniex(unittest.TestCase):
         conf = {
             'poloniex': {'api_key': 'fakekey', 'api_secret': 'fakesecret'}
         }
-        self.plx = polo_exchange.Poloniex(conf)
+        self.plx = polo.Poloniex(conf)
 
     def test_cancel_order(self):
         order = {'orderNumber': 100}

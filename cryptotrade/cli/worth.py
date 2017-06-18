@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 from cliff.lister import Lister
-from cryptotrade import polo_exchange
+from cryptotrade._exchanges import polo
 
 
 class WorthCommand(Lister):
@@ -27,7 +27,7 @@ class WorthCommand(Lister):
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
-        ex = polo_exchange.Poloniex(self.app.cfg)
+        ex = polo.Poloniex(self.app.cfg)
         return (
             ('Currency', 'Worth'),
             ((curr, ex.get_worth(curr)) for curr in ('BTC', 'USD'))

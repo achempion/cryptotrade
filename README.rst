@@ -4,7 +4,7 @@ The ``cryptotrade`` tool is an automation tool for cryptocurrency traders.
 Poloniex
 ========
 
-To work with the exchange, please configure the following section in ~/.cryptotrade.conf:
+To work with exchanges, please configure the following sections in ~/.cryptotrade.conf:
 
 .. code-block:: yaml
 
@@ -12,4 +12,8 @@ To work with the exchange, please configure the following section in ~/.cryptotr
        api_key: <api key>
        api_secret: <api secret>
 
-Both the key and the secret can be obtained from Poloniex UI, through the API Keys menu.
+   coinbase:
+       api_key: <api key>
+       api_secret: <api secret>
+
+Key and secrets can be obtained from the corresponding exchange web UI.
