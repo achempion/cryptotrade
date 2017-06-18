@@ -107,8 +107,10 @@ class TradeAssessCommand(Lister):
         new_worth_btc = ex.get_worth('BTC', balances=balances)
         new_worth_usd = ex.get_worth('USD', balances=balances)
 
-        # todo: maybe handle division by zero
-        profit = (new_worth_btc - old_worth_btc) / old_worth_btc * 100
+        if old_worth_btc:
+            profit = (new_worth_btc - old_worth_btc) / old_worth_btc * 100
+        else:
+            profit = 0
 
         return (
             ('', 'HODL', 'w/strategy'),
