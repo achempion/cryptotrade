@@ -23,7 +23,7 @@ from cliff.command import Command
 # todo: transform into exchange agnostic exceptions
 from poloniex import exceptions as plx_exc
 
-from cryptotrade._exchanges import polo
+from cryptotrade import exchange
 from cryptotrade import trader
 
 
@@ -32,6 +32,13 @@ class TradeClearCommand(Command):
 
     def get_parser(self, prog_name):
         parser = super(TradeClearCommand, self).get_parser(prog_name)
+        # todo: consider consolidating -e argument definitions in single place
+        parser.add_argument(
+            '-e',
+            dest='exchange',
+            required=True,
+            choices=exchange.get_active_exchange_names(self.app.cfg),
+            help='exchange to trade on')
         parser.add_argument(
             '--force',
             action='store_true',
@@ -40,8 +47,7 @@ class TradeClearCommand(Command):
         return parser
 
     def take_action(self, parsed_args):
-        # todo: abstract exchange from the command
-        ex = polo.Poloniex(self.app.cfg)
+        ex = exchange.get_exchange_by_name(self.app.cfg, parsed_args.exchange)
 
         orders = ex.get_orders()
         if not parsed_args.force:
