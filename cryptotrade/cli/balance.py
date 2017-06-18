@@ -18,17 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import collections
+
 from cliff.lister import Lister
-from cryptotrade import polo_exchange
+from cryptotrade import exchange
 
 
 class BalanceCommand(Lister):
     '''list balance for each currency'''
 
     def take_action(self, parsed_args):
-        # todo: abstract exchange from the command
-        ex = polo_exchange.Poloniex(self.app.cfg)
-        balances = ex.get_balances()
+        exchanges = exchange.get_active_exchanges(self.app.cfg)
+        balance_total = collections.defaultdict(float)
+        for ex in exchanges:
+            balances = ex.get_balances()
+            for currency, amount in balances.items():
+                balance_total[currency] += amount
         return (
             ('Currency', 'Balance'),
-            ((k, v) for k, v in balances.items()))
+            ((k, v) for k, v in balance_total.items()))

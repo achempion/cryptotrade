@@ -100,5 +100,6 @@ def get_active_exchanges(conf):
     mgr = EnabledExtensionManager(
         'ct.exchanges',
         lambda ext: ext.name in conf,
+        invoke_on_load=True,
         invoke_args=(conf,))
-    return mgr.extensions
+    return [ext.obj for ext in mgr.extensions]
