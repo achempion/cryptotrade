@@ -1,9 +1,5 @@
 The ``cryptotrade`` tool is an automation tool for cryptocurrency traders.
 
-
-Poloniex
-========
-
 To work with exchanges, please configure the following sections in ~/.cryptotrade.conf:
 
 .. code-block:: yaml
