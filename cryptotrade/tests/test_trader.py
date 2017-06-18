@@ -35,8 +35,10 @@ class TestNoopStrategy(unittest.TestCase):
             for currency in balances.keys()
         }
 
+        fee = 0.0025
+        targets = {'BTC': 0.5, 'ETH': 0.25, 'XMR': 0.25}
         strategy = trader.NoopStrategy()
-        strategy.trade('faketargets', 'BTC', 'fakefee', balances, fake_rates)
+        strategy.trade(targets, 'BTC', fee, balances, fake_rates)
         self.assertEqual(orig_balances, balances)
 
 
@@ -53,7 +55,8 @@ class TestBalanceTrader(unittest.TestCase):
         }
 
         strategy = trader.BCRStrategy()
-        strategy.trade(targets, gold, fee, balances, fake_rates)
+        ops, new_balances = strategy.trade(
+            targets, gold, fee, balances, fake_rates)
 
         # -> BTC = 1000, ETH = 0, LTC = 0 (total 1000 BTC)
         #
@@ -66,7 +69,7 @@ class TestBalanceTrader(unittest.TestCase):
         # iter 3: 687.5 BTC -> 1375 ETH; 859.375 LTC -> 859.375 BTC
         # -> BTC = 515.625, ETH = 2062.5, LTC = 515.625
         self.assertEqual(
-            {'BTC': 515.625, 'ETH': 2062.5, 'LTC': 515.625}, balances)
+            {'BTC': 515.625, 'ETH': 2062.5, 'LTC': 515.625}, new_balances)
 
 
 class TestStrategy(unittest.TestCase):
@@ -76,9 +79,11 @@ class TestStrategy(unittest.TestCase):
         def __init__(self, *args, **kwargs):
             self.calls = []
 
-        def trader(self, *args, **kwargs):
-            self.calls.append((args, kwargs))
-            return []
+        def get_targets(self, targets, gold, balances, rates, i):
+            # we explicitly ignore balances because they depend on targets
+            # under test that are random
+            self.calls.append((targets, gold, rates, i))
+            return targets
 
     def test_trade_number_of_callbacks(self):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
@@ -88,14 +93,17 @@ class TestStrategy(unittest.TestCase):
             ]
             for currency in balances.keys()
         }
-        targets = 'faketargets'
+        targets = {
+           currency: random.random()
+           for currency in balances
+        }
         gold = 'BTC'
-        fee = 'fakefee'
+        fee = 0.0025
 
         strategy = self.FakeStrategy()
         strategy.trade(targets, gold, fee, balances, fake_rates)
         self.assertEqual(
             [
-                ((targets, gold, fee, balances, fake_rates, i), {})
+                (targets, gold, fake_rates, i)
                 for i in range(len(fake_rates[gold]))
             ], strategy.calls)

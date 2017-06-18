@@ -46,34 +46,21 @@ def get_strategy(name):
 @six.add_metaclass(abc.ABCMeta)
 class Strategy(object):
 
-    # todo: pick better names for public entry points
     @abc.abstractmethod
-    def trader(self, targets, gold, fee, balances, rates, i):
+    def get_targets(self, targets, gold, balances, rates, i):
         pass
 
-    def trade(self, targets, gold, fee, balances, rates):
-        # todo: consider making trade() receive exchange object to extract fees
-        # and balances (if not passed) and maybe rates
-        ops = []
-        for i in range(len(rates[gold])):
-            ops_ = self.trader(targets, gold, fee, balances, rates, i)
-            # make sure we buy all the needed gold first before trading it for
-            # other coins, otherwise we risk getting into negative territory
-            ops.append((i, sorted(ops_, key=lambda o: o.op == SELL_OP)))
-        return ops
-
-
-class BCRStrategy(Strategy):
-
-    def get_gold_total(self, targets, balances, rates, i):
+    @staticmethod
+    def get_gold_total(targets, balances, rates, i):
         return sum(
             balances[currency] * rates[currency][i]
             for currency in targets)
 
-    def trader(self, targets, gold, fee, balances, rates, i):
+    def get_ops(self, targets, gold, fee, balances, rates, i):
         ops = []
-        gold_total = self.get_gold_total(targets, balances, rates, i)
+        balances = balances.copy()
 
+        gold_total = self.get_gold_total(targets, balances, rates, i)
         for currency, target in targets.items():
             if currency == gold:
                 continue
@@ -87,8 +74,6 @@ class BCRStrategy(Strategy):
             # todo: use fuzzy comparison
             if gold_worth < gold_target:
                 gold_sold = gold_diff * (1 + fee)
-                balances[currency] += alt_diff
-                balances[gold] -= gold_sold
                 ops.append(
                     TradeOp(
                         op=BUY_OP,
@@ -98,8 +83,6 @@ class BCRStrategy(Strategy):
                         rate=rate))
             elif gold_worth > gold_target:
                 gold_bought = gold_diff * (1 - fee)
-                balances[currency] -= alt_diff
-                balances[gold] += gold_bought
                 ops.append(
                     TradeOp(
                         op=SELL_OP,
@@ -109,7 +92,38 @@ class BCRStrategy(Strategy):
                         rate=rate))
         return ops
 
+    def apply_ops(self, gold, balances, ops):
+        balances = balances.copy()
+        for op in ops:
+            if op.op == SELL_OP:
+                balances[op.alt] -= op.alt_amount
+                balances[gold] += op.gold_amount
+            else:
+                balances[op.alt] += op.alt_amount
+                balances[gold] -= op.gold_amount
+        return balances
+
+    # todo: consider making trade() receive exchange object to extract fees
+    # and balances (if not passed) and maybe rates
+    def trade(self, targets, gold, fee, balances, rates):
+        ops = []
+        balances = balances.copy()
+        for i in range(len(rates[gold])):
+            new_targets = self.get_targets(targets, gold, balances, rates, i)
+            ops_ = self.get_ops(new_targets, gold, fee, balances, rates, i)
+            # make sure we buy all the needed gold first before trading it for
+            # other coins, otherwise we risk getting into negative territory
+            ops.append((i, sorted(ops_, key=lambda o: o.op == SELL_OP)))
+            # adjust balances for next iteration
+            balances = self.apply_ops(gold, balances, ops_)
+        return ops, balances
+
+
+class BCRStrategy(Strategy):
+    def get_targets(self, targets, gold, balances, rates, i):
+        return targets
+
 
 class NoopStrategy(Strategy):
-    def trader(self, targets, gold, fee, balances, rates, i):
-        return []
+    def get_targets(self, targets, gold, balances, rates, i):
+        return targets
