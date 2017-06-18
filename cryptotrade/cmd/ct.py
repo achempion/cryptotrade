@@ -30,6 +30,7 @@ from cliff.app import App
 from cliff.commandmanager import CommandManager
 
 from cryptotrade import config
+from cryptotrade import exchange
 from cryptotrade import version
 
 
@@ -67,4 +68,8 @@ class CtApp(App):
 
 def main(argv=sys.argv[1:]):
     app = CtApp()
-    return app.run(argv)
+    res = app.run(argv)
+    # todo: this is a gross hack to suppress stderr errors on cleaning up
+    # Poloniex object; need to find time to dig why it spills shit
+    exchange._EXCHANGE_MANAGER = None
+    return res
