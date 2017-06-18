@@ -23,7 +23,7 @@ from cryptotrade import polo_exchange
 
 
 class WorthCommand(Lister):
-    '''calculate total worth stored in cryptocurrencies'''
+    '''calculate total worth in BTC and USD'''
 
     def take_action(self, parsed_args):
         # todo: abstract exchange from the command
