@@ -43,7 +43,11 @@ class Exchange(object):
         return NotImplemented
 
     @abc.abstractmethod
-    def cancel_all_orders(self):
+    def get_orders(self):
+        return NotImplemented
+
+    @abc.abstractmethod
+    def cancel_order(self, order):
         return NotImplemented
 
     @abc.abstractmethod

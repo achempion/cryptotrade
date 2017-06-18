@@ -46,7 +46,11 @@ class TestGetWorth(unittest.TestCase):
             return 0.0
 
         # needed to fulfill abstract interface
-        def cancel_all_orders(self):
+        def cancel_order(self):
+            return NotImplemented
+
+        # needed to fulfill abstract interface
+        def get_orders(self):
             return NotImplemented
 
         def get_candlesticks(self, from_, to_, period, start, end):

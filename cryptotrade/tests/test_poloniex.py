@@ -33,19 +33,25 @@ class TestPoloniex(unittest.TestCase):
         }
         self.plx = polo_exchange.Poloniex(conf)
 
-    def test_cancel_all_orders(self):
-        orders = {
+    def test_cancel_order(self):
+        order = {'orderNumber': 100}
+        with mock.patch.object(self.plx.private, 'cancelOrder') as cancel_mock:
+            self.plx.cancel_order(order)
+        cancel_mock.assert_called_with(100)
+
+    def test_get_orders(self):
+        api_orders = {
             'BTC_XMR': [{'orderNumber': 10}, {'orderNumber': 20}],
             'BTC_ETH': [{'orderNumber': 50}],
             'BTC_FCT': [],
         }
         with mock.patch.object(self.plx.private, 'returnOpenOrders',
-                               return_value=orders):
-            with mock.patch.object(self.plx.private,
-                                   'cancelOrder') as cancel_mock:
-                self.plx.cancel_all_orders()
-        cancel_mock.assert_has_calls(
-            [mock.call(num) for num in (10, 20, 50)], any_order=True)
+                               return_value=api_orders):
+            orders = self.plx.get_orders()
+        expected = api_orders.copy()
+        # we should not receive pairs with no orders
+        expected.pop('BTC_FCT')
+        self.assertEqual(expected, orders)
 
     def test_get_candlesticks(self):
         with mock.patch.object(self.plx.public, 'returnChartData') as m:

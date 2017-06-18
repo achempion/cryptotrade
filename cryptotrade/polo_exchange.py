@@ -80,10 +80,16 @@ class Poloniex(exchange.Exchange):
         return self.public.returnChartData(
             '%s_%s' % (from_, to_), period, start=start, end=end)
 
-    def cancel_all_orders(self):
-        for currency_pair, orders_ in self.private.returnOpenOrders().items():
-            for order in orders_:
-                self.private.cancelOrder(order['orderNumber'])
+    def get_orders(self):
+        orders = self.private.returnOpenOrders()
+        return {
+            k: v
+            for k, v in orders.items()
+            if v
+        }
+
+    def cancel_order(self, order):
+        self.private.cancelOrder(order['orderNumber'])
 
     def buy(self, from_, to_, rate, amount):
         # revisit: switch back to .sell api when poloniex library is released
