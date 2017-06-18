@@ -54,7 +54,7 @@ class TestBalanceTrader(unittest.TestCase):
             'BTC': [1.0,  1.0, 1.0],
         }
 
-        strategy = trader.BCRStrategy()
+        strategy = trader.CRPStrategy()
         ops, new_balances = strategy.trade(
             targets, gold, fee, balances, fake_rates)
 

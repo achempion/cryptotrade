@@ -127,7 +127,7 @@ class Strategy(object):
         return ops, balances
 
 
-class BCRStrategy(Strategy):
+class CRPStrategy(Strategy):
     def get_targets(self, targets, gold, balances, rates, i):
         return targets
 
