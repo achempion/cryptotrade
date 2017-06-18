@@ -135,3 +135,6 @@ class BCRStrategy(Strategy):
 class NoopStrategy(Strategy):
     def get_targets(self, targets, gold, balances, rates, i):
         return targets
+
+    def get_ops(self, targets, gold, fee, balances, rates, i):
+        return []
