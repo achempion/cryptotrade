@@ -19,16 +19,16 @@
 # SOFTWARE.
 
 from cliff.lister import Lister
-from cryptotrade._exchanges import polo
+from cryptotrade import exchange
 
 
 class WorthCommand(Lister):
     '''calculate total worth in BTC and USD'''
 
     def take_action(self, parsed_args):
-        # todo: abstract exchange from the command
-        ex = polo.Poloniex(self.app.cfg)
+        exchanges = exchange.get_active_exchanges(self.app.cfg)
         return (
             ('Currency', 'Worth'),
-            ((curr, ex.get_worth(curr)) for curr in ('BTC', 'USD'))
+            ((curr, sum([e.get_worth(curr) for e in exchanges]))
+             for curr in ('BTC', 'USD'))
         )

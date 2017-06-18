@@ -57,7 +57,10 @@ class Coinbase(exchange.Exchange):
         return NotImplemented
 
     def get_rate(self, from_, to_):
-        return NotImplemented
+        if from_ == to_:
+            return 1
+        rates = self.client.get_exchange_rates(currency=to_)
+        return float(rates['rates'][from_])
 
     def get_candlesticks(self, from_, to_, period, start, end):
         return NotImplemented
