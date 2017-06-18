@@ -33,6 +33,7 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         parser = super(TradeExecuteCommand, self).get_parser(prog_name)
         parser.add_argument(
             '--force',
+            action='store_true',
             default=False,
             help="don't ask to confirm before creating orders")
         return parser
