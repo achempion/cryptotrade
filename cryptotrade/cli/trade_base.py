@@ -67,7 +67,7 @@ class BaseTradeCommand(Command):
             raise RuntimeError("error: weights don't add up to 1")
         return targets
 
-    def get_balances(self, exchange, args):
+    def get_balances(self, args):
         if args.balances:
             balances = collections.defaultdict(float)
             for balance in args.balances:

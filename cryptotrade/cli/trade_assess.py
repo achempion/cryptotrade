@@ -59,7 +59,7 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
         gold = 'BTC'
 
         targets = self.get_targets(parsed_args)
-        balances = self.get_balances(ex, parsed_args)
+        balances = self.get_balances(parsed_args)
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
