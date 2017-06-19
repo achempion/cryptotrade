@@ -167,6 +167,7 @@ class PAMRStrategy(Strategy):
         balances = balances.copy()
         gold_total = self.get_gold_total(balances, rates, i)
 
+        # Initialize b1 based on existing balances
         prev_bt = self.prev_bt
         if prev_bt is None:
             prev_bt = {
@@ -174,12 +175,10 @@ class PAMRStrategy(Strategy):
                 for currency, amount in balances.items()
             }
 
+        # Calculate stock price relatives
         if i == 0:
-            xt_ = 1
-            xt = {
-                currency: 1
-                for currency in balances
-            }
+            xt_ = 1.0
+            xt = {currency: xt_ for currency in balances}
         else:
             prev_gold_total = self.get_gold_total(balances, rates, i - 1)
             xt_ = gold_total / prev_gold_total
@@ -187,19 +186,24 @@ class PAMRStrategy(Strategy):
                 currency: rates[currency][i] / rates[currency][i - 1]
                 for currency in balances
             }
+            xt[gold] = 1.0
 
+        # Suffer loss:
         eps = 1
         suffer_loss = max(0, self.multiply(prev_bt, xt) - eps)
 
+        # Set parameters (unmodified PAMR)
         xdiff = self.subtract(xt, {currency: xt_ for currency in xt})
         xdiff2 = self.multiply(xdiff, xdiff)
         if xdiff2:
             tao = suffer_loss / xdiff2
+
+            # Update portfolio
             bt_tmp = self.subtract(
                 prev_bt,
                 {k: v * tao for k, v in xdiff.items()})
 
-            # normalize
+            # Normalize portfolio
             currencies = sorted(bt_tmp.keys())
             to_project = [bt_tmp[cur] for cur in currencies]
             res = euclidean_proj_simplex(to_project)
