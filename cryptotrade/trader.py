@@ -149,7 +149,7 @@ class PAMRStrategy(Strategy):
 
     @staticmethod
     def multiply(v1, v2):
-        assert v1.keys() == v2.keys(), 'vector keys must be the same'
+        assert set(v1.keys()) == set(v2.keys()), 'vector keys must be the same'
         return sum([
             v1[currency] * v2[currency]
             for currency in v1
@@ -157,7 +157,7 @@ class PAMRStrategy(Strategy):
 
     @staticmethod
     def subtract(v1, v2):
-        assert v1.keys() == v2.keys(), 'vector keys must be the same'
+        assert set(v1.keys()) == set(v2.keys()), 'vector keys must be the same'
         return {
             currency: (v1[currency] - v2[currency])
             for currency in v1
@@ -174,29 +174,33 @@ class PAMRStrategy(Strategy):
                 currency: rates[currency][i] * amount / gold_total
                 for currency, amount in balances.items()
             }
+            for k in targets:
+                if k not in prev_bt:
+                    prev_bt[k] = 0.0
 
         # Calculate stock price relatives
         if i == 0:
             xt_ = 1.0
-            xt = {currency: xt_ for currency in balances}
+            xt = {currency: xt_ for currency in targets}
         else:
             prev_gold_total = self.get_gold_total(balances, rates, i - 1)
-            xt_ = gold_total / prev_gold_total
             xt = {
                 currency: rates[currency][i] / rates[currency][i - 1]
-                for currency in balances
+                for currency in targets
             }
             xt[gold] = 1.0
+            xt_ = sum(v for v in xt.values()) / len(xt)
 
         # Suffer loss:
-        eps = 1
+        eps = 1.0
         suffer_loss = max(0, self.multiply(prev_bt, xt) - eps)
 
         # Set parameters (unmodified PAMR)
         xdiff = self.subtract(xt, {currency: xt_ for currency in xt})
+        xdiff = {currency: abs(diff) for currency, diff in xdiff.items()}
         xdiff2 = self.multiply(xdiff, xdiff)
         if xdiff2:
-            tao = suffer_loss / xdiff2
+            tao = min(10, suffer_loss / xdiff2)
 
             # Update portfolio
             bt_tmp = self.subtract(
