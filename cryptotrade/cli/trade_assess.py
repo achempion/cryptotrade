@@ -65,7 +65,7 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
         old_worth_usd = ex.get_worth('USD', balances=balances)
 
         rates = ex.get_closing_rates(
-            gold, list(targets.keys()),
+            gold, list(set(balances.keys() + targets.keys())),
             parsed_args.interval,
             in_past, now)
 
