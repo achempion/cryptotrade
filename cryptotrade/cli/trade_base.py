@@ -63,7 +63,8 @@ class BaseTradeCommand(Command):
             weight = float(weight)
             total_weight += weight
             targets[currency] = weight
-        if total_weight != 1.0:
+        # todo: revisit the rounding workaround
+        if round(total_weight, 5) != round(1.0):
             raise RuntimeError("error: weights don't add up to 1")
         return targets
 

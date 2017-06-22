@@ -112,8 +112,10 @@ class Strategy(object):
         for i in range(len(rates[gold])):
             # calculate new targets
             targets = self.get_targets(targets, gold, balances, rates, i)
+            # todo: revisit the rounding workaround
             assert \
-                sum(targets.values()) == 1.0, "new targets don't add up to 1.0"
+                round(sum(targets.values()), 5) == round(1.0, 5), \
+                "new targets don't add up to 1.0"
 
             # produce buy/sell operations based on current balance and targets
             ops_ = self.get_ops(targets, gold, fee, balances, rates, i)
@@ -183,7 +185,6 @@ class PAMRStrategy(Strategy):
             xt_ = 1.0
             xt = {currency: xt_ for currency in targets}
         else:
-            prev_gold_total = self.get_gold_total(balances, rates, i - 1)
             xt = {
                 currency: rates[currency][i] / rates[currency][i - 1]
                 for currency in targets
