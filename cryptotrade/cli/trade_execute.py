@@ -18,9 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import time
+
 # todo: transform into exchange agnostic exceptions
 from poloniex import exceptions as plx_exc
 
+from cryptotrade._exchanges import polo
 from cryptotrade.cli import trade_base
 from cryptotrade import exchange
 from cryptotrade import trader
@@ -36,6 +39,14 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
             action='store_true',
             default=False,
             help="don't ask to confirm before creating orders")
+        parser.add_argument(
+            '-i',
+            dest='interval',
+            required=True,
+            type=int,
+            # todo: untangle from poloniex exchange
+            choices=polo.Poloniex.CANDLESTICKS,
+            help='time since previous assessment')
         return parser
 
     def take_action(self, parsed_args):
@@ -47,10 +58,13 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         weights = parsed_args.weights
         balances = exchange.get_global_balance(self.app.cfg)
 
-        rates = {
-            target: [ex.get_rate(gold, target)]
-            for target in targets
-        }
+        now = time.time()
+        in_past = now - parsed_args.interval * 2  # we need two datapoints
+
+        rates = ex.get_closing_rates(
+            gold, list(set(balances.keys() + targets)),
+            parsed_args.interval,
+            in_past, now)
 
         strategy = trader.get_strategy(parsed_args.strategy)
         ops, _ = strategy.trade(

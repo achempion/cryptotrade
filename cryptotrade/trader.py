@@ -139,7 +139,6 @@ class Strategy(object):
 
             # log wealth change
             gold_total = self.get_gold_total(balances, rates, i)
-            print('%.3f %s total (%s)' % (gold_total, gold, balances))
         return ops, balances
 
 
@@ -187,14 +186,21 @@ class PAMRStrategy(Strategy):
             balances[cur] * rates[cur][i] / gold_total
             for cur in currencies
         ]
+
+        if i == 0:
+            return currencies, bi
+
         biv = robjects.FloatVector(bi)
 
         olpsR = importr("olpsR")
         weights = [float(w) for w in olpsR.alg_PAMR(biv, rets)]
 
         # make sure they all add up to 1.0
-        gold_idx = currencies.index(gold)
-        weights[gold_idx] = (
-            1.0 - sum(weights[:gold_idx] + weights[gold_idx + 1:]))
+        #gold_idx = currencies.index(gold)
+        #weights[gold_idx] = (
+        #    1.0 - sum(weights[:gold_idx] + weights[gold_idx + 1:]))
+        assert \
+            all([w >= 0.0 for w in weights]), \
+            "negative weights! %s" % weights
 
         return currencies, weights
