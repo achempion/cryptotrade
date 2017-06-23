@@ -71,25 +71,28 @@ class Strategy(object):
             gold_worth = balances[currency] * rate
             gold_target = gold_total * target
             gold_diff = abs(gold_target - gold_worth)
+            gold_diff = gold_diff / 1.05  # adjust a bit for any float pennies
             alt_diff = gold_diff / rate
 
             # todo: use fuzzy comparison
             if gold_worth < gold_target:
-                gold_sold = gold_diff * (1 + fee)
+                gold_sold = gold_diff / (1 + fee)
+                alt_bought = alt_diff
                 ops.append(
                     TradeOp(
                         op=BUY_OP,
                         gold_amount=gold_sold,
-                        alt_amount=alt_diff,
+                        alt_amount=alt_bought,
                         alt=currency,
                         rate=rate))
             elif gold_worth > gold_target:
-                gold_bought = gold_diff * (1 - fee)
+                gold_bought = gold_diff
+                alt_sold = alt_diff * (1 + fee)
                 ops.append(
                     TradeOp(
                         op=SELL_OP,
                         gold_amount=gold_bought,
-                        alt_amount=alt_diff,
+                        alt_amount=alt_sold,
                         alt=currency,
                         rate=rate))
         return ops
@@ -130,6 +133,9 @@ class Strategy(object):
 
             # adjust balances for next iteration
             balances = self.apply_ops(gold, balances, ops_)
+            assert \
+                all([v >= 0.0 for v in balances.values()]), \
+                "negative balance! %s" % balances
 
             # log wealth change
             gold_total = self.get_gold_total(balances, rates, i)
