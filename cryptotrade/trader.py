@@ -181,7 +181,7 @@ class PAMRStrategy(Strategy):
         biv = robjects.FloatVector(bi)
 
         olpsR = importr("olpsR")
-        weights = olpsR.alg_PAMR(biv, rets)
+        weights = [float(w) for w in olpsR.alg_PAMR(biv, rets)]
 
         # make sure they all add up to 1.0
         gold_idx = currencies.index(gold)
