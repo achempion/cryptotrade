@@ -130,6 +130,10 @@ class Strategy(object):
 
             # adjust balances for next iteration
             balances = self.apply_ops(gold, balances, ops_)
+
+            # log wealth change
+            gold_total = self.get_gold_total(balances, rates, i)
+            print('%.3f %s total (%s)' % (gold_total, gold, balances))
         return ops, balances
 
 
