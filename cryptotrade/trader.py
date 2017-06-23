@@ -140,9 +140,6 @@ class Strategy(object):
             assert \
                 all([v >= 0.0 for v in balances.values()]), \
                 "negative balance! %s" % balances
-
-            # log wealth change
-            gold_total = self.get_gold_total(balances, rates, i)
         return ops, balances
 
 
@@ -199,10 +196,6 @@ class PAMRStrategy(Strategy):
         olpsR = importr("olpsR")
         weights = [float(w) for w in olpsR.alg_PAMR(biv, rets)]
 
-        # make sure they all add up to 1.0
-        #gold_idx = currencies.index(gold)
-        #weights[gold_idx] = (
-        #    1.0 - sum(weights[:gold_idx] + weights[gold_idx + 1:]))
         assert \
             all([w >= 0.0 for w in weights]), \
             "negative weights! %s" % weights
