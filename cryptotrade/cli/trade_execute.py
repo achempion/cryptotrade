@@ -53,53 +53,52 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         }
 
         strategy = trader.get_strategy(parsed_args.strategy)
-        ops = strategy.trade(
+        ops, _ = strategy.trade(
             targets, weights, gold, ex.get_fee(), balances, rates)
 
+        _, ops_ = ops[-1]  # we are interested in the last 'trade' only
         if not parsed_args.force:
-            if ops:
+            if ops_:
                 print('The following trade orders are to be schedule:')
-                for _, ops_ in ops:
-                    for o in ops_:
-                        d = {'gold': gold,
-                             'op': o.op,
-                             'rate': o.rate,
-                             'gold_amount': o.gold_amount,
-                             'alt_amount': o.alt_amount,
-                             'alt': o.alt}
-                        if o.op == trader.SELL_OP:
-                            print(' * buy %(gold_amount).4f %(gold)s '
-                                  'with %(alt_amount).4f %(alt)s '
-                                  '(rate: %(rate)s)' % d)
-                        else:
-                            print(' * sell %(gold_amount).4f %(gold)s '
-                                  'for %(alt_amount).4f %(alt)s '
-                                  '(rate: %(rate)s)' % d)
+                for o in ops_:
+                    d = {'gold': gold,
+                         'op': o.op,
+                         'rate': o.rate,
+                         'gold_amount': o.gold_amount,
+                         'alt_amount': o.alt_amount,
+                         'alt': o.alt}
+                    if o.op == trader.SELL_OP:
+                        print(' * buy %(gold_amount).4f %(gold)s '
+                              'with %(alt_amount).4f %(alt)s '
+                              '(rate: %(rate)s)' % d)
+                    else:
+                        print(' * sell %(gold_amount).4f %(gold)s '
+                              'for %(alt_amount).4f %(alt)s '
+                              '(rate: %(rate)s)' % d)
                 answer = raw_input("Would you like to proceed? ")
                 if answer not in 'yY':
                     return
 
-        for _, ops_ in ops:
-            for o in ops_:
-                method = ex.sell if o.op == trader.SELL_OP else ex.buy
-                try:
-                    order_number = method(gold, o.alt, o.rate, o.alt_amount)
-                except plx_exc.PoloniexCommandException as e:
-                    print('Failed to create %(op)s order for '
-                          '%(alt_amount).4f %(alt)s: %(e)s' %
-                          {
-                              'op': o.op,
-                              'alt_amount': o.alt_amount,
-                              'alt': o.alt,
-                              'e': e,
-                          })
-                    raise
-
-                print('Placed order %(order_number)d to '
-                      '%(op)s %(alt_amount).4f %(alt)s' %
+        for o in ops_:
+            method = ex.sell if o.op == trader.SELL_OP else ex.buy
+            try:
+                order_number = method(gold, o.alt, o.rate, o.alt_amount)
+            except plx_exc.PoloniexCommandException as e:
+                print('Failed to create %(op)s order for '
+                      '%(alt_amount).4f %(alt)s: %(e)s' %
                       {
-                          'order_number': order_number,
                           'op': o.op,
                           'alt_amount': o.alt_amount,
                           'alt': o.alt,
+                          'e': e,
                       })
+                raise
+
+            print('Placed order %(order_number)d to '
+                  '%(op)s %(alt_amount).4f %(alt)s' %
+                  {
+                      'order_number': order_number,
+                      'op': o.op,
+                      'alt_amount': o.alt_amount,
+                      'alt': o.alt,
+                  })
