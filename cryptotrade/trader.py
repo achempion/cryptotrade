@@ -48,6 +48,9 @@ def get_strategy(name):
 @six.add_metaclass(abc.ABCMeta)
 class Strategy(object):
 
+    def __init__(self, adjust_gold=1.05):
+        self.adjust_gold = adjust_gold
+
     @abc.abstractmethod
     def get_targets(self, targets, weights, gold, balances, rates, i):
         pass
@@ -71,7 +74,8 @@ class Strategy(object):
             gold_worth = balances[currency] * rate
             gold_target = gold_total * target
             gold_diff = abs(gold_target - gold_worth)
-            gold_diff = gold_diff / 1.05  # adjust a bit for any float pennies
+            # adjust a bit for any float pennies
+            gold_diff = gold_diff / self.adjust_gold
             alt_diff = gold_diff / rate
 
             # todo: use fuzzy comparison

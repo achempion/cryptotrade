@@ -56,7 +56,7 @@ class TestBalanceTrader(unittest.TestCase):
             'BTC': [1.0,  1.0, 1.0],
         }
 
-        strategy = trader.CRPStrategy()
+        strategy = trader.CRPStrategy(adjust_gold=1.0)
         ops, new_balances = strategy.trade(
             targets, weights, gold, fee, balances, fake_rates)
 
@@ -79,6 +79,7 @@ class TestStrategy(unittest.TestCase):
     class FakeStrategy(trader.Strategy):
 
         def __init__(self, *args, **kwargs):
+            super(self.__class__, self).__init__(*args, **kwargs)
             self.calls = []
 
         def get_targets(self, targets, weights, gold, balances, rates, i):
