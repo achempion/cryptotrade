@@ -77,5 +77,5 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
 
         return (
             ('', '-', parsed_args.strategy),
-             (('BTC', old_worth_btc, new_worth_btc),),
+            (('BTC', old_worth_btc, new_worth_btc),),
         )

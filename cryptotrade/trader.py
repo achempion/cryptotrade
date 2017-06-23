@@ -140,12 +140,15 @@ class Strategy(object):
 class CRPStrategy(Strategy):
     def get_targets(self, targets, weights, gold, balances, rates, i):
         # validate input targets add up to 1
-        total_weight = 0
-        for cur, weight in zip(targets, weights):
-            total_weight += weight
-        # todo: revisit the rounding workaround
-        if round(total_weight, 5) != round(1.0):
-            raise RuntimeError("error: weights don't add up to 1")
+        if weights:
+            total_weight = 0
+            for cur, weight in zip(targets, weights):
+                total_weight += weight
+            # todo: revisit the rounding workaround
+            if round(total_weight, 5) != round(1.0):
+                raise RuntimeError("error: weights don't add up to 1")
+        else:
+            weights = [1.0/len(targets)] * len(targets)
         return targets, weights
 
 
