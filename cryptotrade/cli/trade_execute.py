@@ -43,8 +43,7 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
 
         gold = 'BTC'
 
-        targets = parsed_args.targets
-        weights = parsed_args.weights
+        targets = self.get_targets(parsed_args)
         balances = exchange.get_global_balance(self.app.cfg)
 
         rates = {
@@ -53,8 +52,7 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         }
 
         strategy = trader.get_strategy(parsed_args.strategy)
-        ops = strategy.trade(
-            targets, weights, gold, ex.get_fee(), balances, rates)
+        ops = strategy.trade(targets, gold, ex.get_fee(), balances, rates)
 
         if not parsed_args.force:
             if ops:

@@ -36,17 +36,15 @@ class TestNoopStrategy(unittest.TestCase):
         }
 
         fee = 0.0025
-        targets = ['BTC', 'ETH', 'XMR']
-        weights = [0.5, 0.25, 0.25]
+        targets = {'BTC': 0.5, 'ETH': 0.25, 'XMR': 0.25}
         strategy = trader.NoopStrategy()
-        strategy.trade(targets, weights, 'BTC', fee, balances, fake_rates)
+        strategy.trade(targets, 'BTC', fee, balances, fake_rates)
         self.assertEqual(orig_balances, balances)
 
 
 class TestBalanceTrader(unittest.TestCase):
     def test_balance_trader_balances(self):
-        targets = ['ETH', 'BTC', 'LTC']
-        weights = [0.5, 0.25, 0.25]
+        targets = {'ETH': 0.5, 'BTC': 0.25, 'LTC': 0.25}
         gold = 'BTC'
         fee = 0.0  # to simplify matters
         balances = {'BTC': 1000.0, 'ETH': 0.0, 'LTC': 0.0}
@@ -58,7 +56,7 @@ class TestBalanceTrader(unittest.TestCase):
 
         strategy = trader.CRPStrategy()
         ops, new_balances = strategy.trade(
-            targets, weights, gold, fee, balances, fake_rates)
+            targets, gold, fee, balances, fake_rates)
 
         # -> BTC = 1000, ETH = 0, LTC = 0 (total 1000 BTC)
         #
@@ -81,16 +79,15 @@ class TestStrategy(unittest.TestCase):
         def __init__(self, *args, **kwargs):
             self.calls = []
 
-        def get_weights(self, targets, weights, gold, balances, rates, i):
+        def get_targets(self, targets, gold, balances, rates, i):
             # we explicitly ignore balances because they depend on targets
             # under test that are random
-            self.calls.append((targets, weights, gold, rates, i))
-            return weights
+            self.calls.append((targets, gold, rates, i))
+            return targets
 
     def test_trade_number_of_callbacks(self):
         balances = {'BTC': 5, 'ETH': 10, 'XMR': 20}
-        targets = ['BTC', 'ETH', 'XMR']
-        weights = [0.5, 0.25, 0.25]
+        targets = {'BTC': 0.5, 'ETH': 0.25, 'XMR': 0.25}
         fake_rates = {
             currency: [
                 random.random() for i in range(5)
@@ -101,9 +98,9 @@ class TestStrategy(unittest.TestCase):
         fee = 0.0025
 
         strategy = self.FakeStrategy()
-        strategy.trade(targets, weights, gold, fee, balances, fake_rates)
+        strategy.trade(targets, gold, fee, balances, fake_rates)
         self.assertEqual(
             [
-                (targets, weights, gold, fake_rates, i)
+                (targets, gold, fake_rates, i)
                 for i in range(len(fake_rates[gold]))
             ], strategy.calls)

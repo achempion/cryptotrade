@@ -58,21 +58,20 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
 
         gold = 'BTC'
 
-        targets = parsed_args.targets
-        weights = parsed_args.weights
+        targets = self.get_targets(parsed_args)
         balances = self.get_balances(parsed_args)
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
         old_worth_usd = ex.get_worth('USD', balances=balances)
 
         rates = ex.get_closing_rates(
-            gold, list(set(balances.keys() + targets)),
+            gold, list(set(balances.keys() + targets.keys())),
             parsed_args.interval,
             in_past, now)
 
         strategy = trader.get_strategy(parsed_args.strategy)
         _, new_balances = strategy.trade(
-            targets, weights, gold, ex.get_fee(), balances, rates)
+            targets, gold, ex.get_fee(), balances, rates)
 
         new_worth_btc = ex.get_worth('BTC', balances=new_balances)
         new_worth_usd = ex.get_worth('USD', balances=new_balances)
