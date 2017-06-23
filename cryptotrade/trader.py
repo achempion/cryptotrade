@@ -49,7 +49,7 @@ def get_strategy(name):
 class Strategy(object):
 
     @abc.abstractmethod
-    def get_targets(self, targets, gold, balances, rates, i):
+    def get_targets(self, targets, weights, gold, balances, rates, i):
         pass
 
     @staticmethod
@@ -58,12 +58,12 @@ class Strategy(object):
             balances[currency] * rates[currency][i]
             for currency in balances)
 
-    def get_ops(self, targets, gold, fee, balances, rates, i):
+    def get_ops(self, targets, weights, gold, fee, balances, rates, i):
         ops = []
         balances = balances.copy()
 
         gold_total = self.get_gold_total(balances, rates, i)
-        for currency, target in targets.items():
+        for currency, target in zip(targets, weights):
             if currency == gold:
                 continue
 
@@ -107,19 +107,21 @@ class Strategy(object):
 
     # todo: consider making trade() receive exchange object to extract fees
     # and balances (if not passed) and maybe rates
-    def trade(self, targets, gold, fee, balances, rates):
+    def trade(self, targets, weights, gold, fee, balances, rates):
         ops = []
         balances = balances.copy()
         for i in range(len(rates[gold])):
             # calculate new targets
-            targets = self.get_targets(targets, gold, balances, rates, i)
+            targets, weights = self.get_targets(
+                targets, weights, gold, balances, rates, i)
             # todo: revisit the rounding workaround
             assert \
-                round(sum(targets.values()), 5) == round(1.0, 5), \
+                round(sum(weights), 5) == round(1.0, 5), \
                 "new targets don't add up to 1.0"
 
             # produce buy/sell operations based on current balance and targets
-            ops_ = self.get_ops(targets, gold, fee, balances, rates, i)
+            ops_ = self.get_ops(
+                targets, weights, gold, fee, balances, rates, i)
 
             # make sure we buy all the needed gold first before trading it for
             # other coins, otherwise we risk getting into negative territory
@@ -136,15 +138,22 @@ class Strategy(object):
 
 
 class CRPStrategy(Strategy):
-    def get_targets(self, targets, gold, balances, rates, i):
-        return targets
+    def get_targets(self, targets, weights, gold, balances, rates, i):
+        # validate input targets add up to 1
+        total_weight = 0
+        for cur, weight in zip(targets, weights):
+            total_weight += weight
+        # todo: revisit the rounding workaround
+        if round(total_weight, 5) != round(1.0):
+            raise RuntimeError("error: weights don't add up to 1")
+        return targets, weights
 
 
 class NoopStrategy(Strategy):
-    def get_targets(self, targets, gold, balances, rates, i):
-        return targets
+    def get_targets(self, targets, weights, gold, balances, rates, i):
+        return targets, weights
 
-    def get_ops(self, targets, gold, fee, balances, rates, i):
+    def get_ops(self, targets, weights, gold, fee, balances, rates, i):
         return []
 
 
@@ -152,10 +161,11 @@ class PAMRStrategy(Strategy):
 
     # this assumes https://github.com/booxter/olpsR variant of olpsR installed
 
-    def get_targets(self, targets, gold, balances, rates, i):
+    def get_targets(self, targets, weights, gold, balances, rates, i):
+        # weights ignored since we calculate our own weights on each iteration
 
         gold_total = self.get_gold_total(balances, rates, i)
-        currencies = sorted(set(balances.keys()) | set(targets.keys()))
+        currencies = sorted(set(balances.keys()) | set(targets))
 
         # prepare arguments
         returns = [
@@ -171,15 +181,11 @@ class PAMRStrategy(Strategy):
         biv = robjects.FloatVector(bi)
 
         olpsR = importr("olpsR")
-        targets = olpsR.alg_PAMR(biv, rets)
-
-        new_targets = {
-            k: targets[i]
-            for i, k in enumerate(currencies)
-        }
+        weights = olpsR.alg_PAMR(biv, rets)
 
         # make sure they all add up to 1.0
-        new_targets[gold] = (
-            1.0 - sum(v for k, v in new_targets.items() if k != gold))
+        gold_idx = currencies.index(gold)
+        weights[gold_idx] = (
+            1.0 - sum(weights[:gold_idx] + weights[gold_idx + 1:]))
 
-        return new_targets
+        return currencies, weights

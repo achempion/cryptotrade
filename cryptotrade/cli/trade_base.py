@@ -46,27 +46,19 @@ class BaseTradeCommand(Command):
             choices=trader.list_strategy_names(),
             help='trading strategy')
         parser.add_argument(
-            # todo: this argument is bcr specific, consider moving it into a
-            # separate subcommand
             '-t',
             dest='targets',
             action='append',
-            metavar='CURRENCY=WEIGHT',
-            help='target weight per currency')
+            metavar='CURRENCY',
+            help='portfolio currencies')
+        parser.add_argument(
+            '-w',
+            dest='weights',
+            type=float,
+            action='append',
+            metavar='WEIGHT',
+            help='currency weights (in order of -t)')
         return parser
-
-    def get_targets(self, args):
-        targets = {}
-        total_weight = 0
-        for target in args.targets:
-            currency, weight = target.split('=')
-            weight = float(weight)
-            total_weight += weight
-            targets[currency] = weight
-        # todo: revisit the rounding workaround
-        if round(total_weight, 5) != round(1.0):
-            raise RuntimeError("error: weights don't add up to 1")
-        return targets
 
     def get_balances(self, args):
         if args.balances:
