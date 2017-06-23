@@ -63,7 +63,6 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
         balances = self.get_balances(parsed_args)
 
         old_worth_btc = ex.get_worth('BTC', balances=balances)
-        old_worth_usd = ex.get_worth('USD', balances=balances)
 
         rates = ex.get_closing_rates(
             gold, list(set(balances.keys() + targets)),
@@ -75,16 +74,8 @@ class TradeAssessCommand(Lister, trade_base.BaseTradeCommand):
             targets, weights, gold, ex.get_fee(), balances, rates)
 
         new_worth_btc = ex.get_worth('BTC', balances=new_balances)
-        new_worth_usd = ex.get_worth('USD', balances=new_balances)
-
-        if old_worth_btc:
-            profit = (new_worth_btc - old_worth_btc) / old_worth_btc * 100
-        else:
-            profit = 0
 
         return (
             ('', '-', parsed_args.strategy),
-            (('USD', old_worth_usd, new_worth_usd),
-             ('BTC', old_worth_btc, new_worth_btc),
-             ('%', '100%', '%s%%' % (100 + profit)))
+             (('BTC', old_worth_btc, new_worth_btc),),
         )
