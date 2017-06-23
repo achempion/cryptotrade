@@ -4,5 +4,6 @@ coinbase
 numpy
 poloniex
 PyYAML
+rpy2
 six
 stevedore

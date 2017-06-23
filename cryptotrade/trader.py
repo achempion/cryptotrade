@@ -21,7 +21,8 @@
 import abc
 import collections
 
-import numpy as np
+from rpy2.robjects.packages import importr
+import rpy2.robjects as robjects
 import six
 from stevedore.driver import DriverManager
 from stevedore.extension import ExtensionManager
@@ -145,136 +146,36 @@ class NoopStrategy(Strategy):
 
 class PAMRStrategy(Strategy):
 
-    def __init__(self, *args, **kwargs):
-        super(PAMRStrategy, self).__init__(*args, **kwargs)
-        self.prev_bt = None
-
-    @staticmethod
-    def multiply(v1, v2):
-        assert set(v1.keys()) == set(v2.keys()), 'vector keys must be the same'
-        return sum([
-            v1[currency] * v2[currency]
-            for currency in v1
-        ])
-
-    @staticmethod
-    def subtract(v1, v2):
-        assert set(v1.keys()) == set(v2.keys()), 'vector keys must be the same'
-        return {
-            currency: (v1[currency] - v2[currency])
-            for currency in v1
-        }
+    # this assumes https://github.com/booxter/olpsR variant of olpsR installed
 
     def get_targets(self, targets, gold, balances, rates, i):
-        balances = balances.copy()
+
         gold_total = self.get_gold_total(balances, rates, i)
+        currencies = sorted(set(balances.keys()) | set(targets.keys()))
 
-        # Initialize b1 based on existing balances
-        prev_bt = self.prev_bt
-        if prev_bt is None:
-            prev_bt = {
-                currency: rates[currency][i] * amount / gold_total
-                for currency, amount in balances.items()
-            }
-            for k in targets:
-                if k not in prev_bt:
-                    prev_bt[k] = 0.0
+        # prepare arguments
+        returns = [
+            rates[cur][i] / rates[cur][i - 1]
+            for cur in currencies
+        ]
+        rets = robjects.FloatVector(returns)
 
-        # Calculate stock price relatives
-        if i == 0:
-            xt_ = 1.0
-            xt = {currency: xt_ for currency in targets}
-        else:
-            xt = {
-                currency: rates[currency][i] / rates[currency][i - 1]
-                for currency in targets
-            }
-            xt[gold] = 1.0
-            xt_ = sum(v for v in xt.values()) / len(xt)
+        bi = [
+            balances[cur] * rates[cur][i] / gold_total
+            for cur in currencies
+        ]
+        biv = robjects.FloatVector(bi)
 
-        # Suffer loss:
-        eps = 1.0
-        suffer_loss = max(0, self.multiply(prev_bt, xt) - eps)
+        olpsR = importr("olpsR")
+        targets = olpsR.alg_PAMR(biv, rets)
 
-        # Set parameters (unmodified PAMR)
-        xdiff = self.subtract(xt, {currency: xt_ for currency in xt})
-        xdiff = {currency: abs(diff) for currency, diff in xdiff.items()}
-        xdiff2 = self.multiply(xdiff, xdiff)
-        if xdiff2:
-            tao = min(10, suffer_loss / xdiff2)
+        new_targets = {
+            k: targets[i]
+            for i, k in enumerate(currencies)
+        }
 
-            # Update portfolio
-            bt_tmp = self.subtract(
-                prev_bt,
-                {k: v * tao for k, v in xdiff.items()})
+        # make sure they all add up to 1.0
+        new_targets[gold] = (
+            1.0 - sum(v for k, v in new_targets.items() if k != gold))
 
-            # Normalize portfolio
-            currencies = sorted(bt_tmp.keys())
-            to_project = [bt_tmp[cur] for cur in currencies]
-            res = euclidean_proj_simplex(to_project)
-
-            next_bt = {}
-            for v, cur in zip(res, currencies):
-                next_bt[cur] = v
-
-            # make sure they all add up to 1
-            next_bt[gold] = (
-                1.0 - sum(v for k, v in next_bt.items() if k != gold))
-        else:
-            next_bt = prev_bt
-
-        self.prev_bt = next_bt
-        return next_bt
-
-
-# somewhere from internet, to replace with something more safe proof
-def euclidean_proj_simplex(v, s=1):
-    """ Compute the Euclidean projection on a positive simplex
-
-    Solves the optimisation problem (using the algorithm from [1]):
-
-        min_w 0.5 * || w - v ||_2^2 , s.t. \sum_i w_i = s, w_i >= 0
-
-    Parameters
-    ----------
-    v: (n,) numpy array,
-       n-dimensional vector to project
-
-    s: int, optional, default: 1,
-       radius of the simplex
-
-    Returns
-    -------
-    w: (n,) numpy array,
-       Euclidean projection of v on the simplex
-
-    Notes
-    -----
-    The complexity of this algorithm is in O(n log(n)) as it involves sorting
-    v.  Better alternatives exist for high-dimensional sparse vectors (cf. [1])
-    However, this implementation still easily scales to millions of dimensions.
-
-    References
-    ----------
-    [1] Efficient Projections onto the .1-Ball for Learning in High Dimensions
-        John Duchi, Shai Shalev-Shwartz, Yoram Singer, and Tushar Chandra.
-        International Conference on Machine Learning (ICML 2008)
-        http://www.cs.berkeley.edu/~jduchi/projects/DuchiSiShCh08.pdf
-    """
-    v = np.asarray(v)
-    assert s > 0, "Radius s must be strictly positive (%d <= 0)" % s
-    n, = v.shape  # will raise ValueError if v is not 1-D
-    # check if we are already on the simplex
-    if v.sum() == s and np.alltrue(v >= 0):
-        # best projection: itself!
-        return v
-    # get the array of cumulative sums of a sorted (decreasing) copy of v
-    u = np.sort(v)[::-1]
-    cssv = np.cumsum(u)
-    # get the number of > 0 components of the optimal solution
-    rho = np.nonzero(u * np.arange(1, n + 1) > (cssv - s))[0][-1]
-    # compute the Lagrange multiplier associated to the simplex constraint
-    theta = (cssv[rho] - s) / (rho + 1.0)
-    # compute the projection by thresholding v using theta
-    w = (v - theta).clip(min=0)
-    return w
+        return new_targets
