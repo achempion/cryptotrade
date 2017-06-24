@@ -111,9 +111,7 @@ def _get_exchange_manager(conf):
     if _EXCHANGE_MANAGER is None:
         _EXCHANGE_MANAGER = EnabledExtensionManager(
             'ct.exchanges',
-            lambda ext: ext.name in conf,
-            invoke_on_load=True,
-            invoke_args=(conf,))
+            lambda ext: ext.name in conf)
     return _EXCHANGE_MANAGER
 
 
@@ -125,13 +123,18 @@ def get_active_exchange_names(conf):
 
 
 def get_active_exchanges(conf):
+    for ext in _get_exchange_manager(conf).extensions:
+        if ext.obj is None and ext.name in conf:
+            ext.obj = ext.plugin(conf)
     return [
         ext.obj
         for ext in _get_exchange_manager(conf).extensions
+        if ext.obj is not None
     ]
 
 
 def get_exchange_by_name(conf, name):
+    get_active_exchanges(conf)  # load all plugins if not already
     mgr = _get_exchange_manager(conf)
     for ext in mgr.extensions:
         if ext.name == name:
