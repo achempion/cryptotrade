@@ -73,7 +73,7 @@ class Poloniex(exchange.Exchange):
         ticker = self._ticker
         from_ = from_ if from_ != 'USD' else 'USDT'
         pair = '%s_%s' % (from_, to_)
-        return ticker[pair]['last']
+        return (ticker[pair]['lowestAsk'] + ticker[pair]['highestBid']) / 2
 
     def get_candlesticks(self, from_, to_, period, start, end):
         assert from_ == 'BTC', 'poloneix has pairs for BTC only'
