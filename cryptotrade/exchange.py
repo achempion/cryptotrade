@@ -80,10 +80,10 @@ class Exchange(object):
                 worth += converted_amount
         return worth
 
-    def get_closing_rates(self, gold, other, period, start, end):
+    def _get_rates(self, type_, gold, other, period, start, end):
         res = {
             currency: [
-                candle['close']
+                candle[type_]
                 for candle in self.get_candlesticks(
                     gold, currency, period, start, end)
             ]
@@ -95,6 +95,12 @@ class Exchange(object):
             break
         res[gold] = [1] * num_of_rates
         return res
+
+    def get_closing_rates(self, gold, other, period, start, end):
+        return self._get_rates('close', gold, other, period, start, end)
+
+    def get_opening_rates(self, gold, other, period, start, end):
+        return self._get_rates('open', gold, other, period, start, end)
 
 
 _EXCHANGE_MANAGER = None
