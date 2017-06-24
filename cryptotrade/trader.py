@@ -132,7 +132,7 @@ class Strategy(object):
 
             # make sure we buy all the needed gold first before trading it for
             # other coins, otherwise we risk getting into negative territory
-            ops_ = sorted(ops_, key=lambda o: o.op == SELL_OP)
+            ops_ = sorted(ops_, key=lambda o: o.op != SELL_OP)
             ops.append((i, ops_))
 
             # adjust balances for next iteration
