@@ -59,12 +59,27 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         balances = exchange.get_global_balance(self.app.cfg)
 
         now = time.time()
-        in_past = now - parsed_args.interval * 2  # we need two datapoints
+        in_past = now - parsed_args.interval
 
-        rates = ex.get_closing_rates(
+        old_rates = ex.get_opening_rates(
             gold, list(set(balances.keys() + targets)),
             parsed_args.interval,
             in_past, now)
+        assert \
+            all([len(v) == 1 for v in old_rates.values()]), \
+            "too many rate results"
+
+        new_rates = ex.get_closing_rates(
+            gold, list(set(balances.keys() + targets)),
+            parsed_args.interval,
+            in_past, now)
+        assert \
+            all([len(v) == 1 for v in old_rates.values()]), \
+            "too many rate results"
+
+        rates = {}
+        for target in targets:
+            rates[target] = old_rates[target] + new_rates[target]
 
         strategy = trader.get_strategy(parsed_args.strategy)
         ops, _ = strategy.trade(
