@@ -108,26 +108,48 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
                 if answer not in 'yY':
                     return
 
-        for o in ops_:
-            method = ex.sell if o.op == trader.SELL_OP else ex.buy
-            try:
-                order_number = method(gold, o.alt, o.rate, o.alt_amount)
-            except plx_exc.PoloniexCommandException as e:
-                print('Failed to create %(op)s order for '
-                      '%(alt_amount).4f %(alt)s: %(e)s' %
+        sell_ops = [o for o in ops_ if o.op == trader.SELL_OP]
+        buy_ops = [o for o in ops_ if o.op == trader.BUY_OP]
+
+        def create_orders(ops):
+            for o in ops:
+                method = ex.sell if o.op == trader.SELL_OP else ex.buy
+                try:
+                    order_number = method(gold, o.alt, o.rate, o.alt_amount)
+                except plx_exc.PoloniexCommandException as e:
+                    print('Failed to create %(op)s order for '
+                          '%(alt_amount).4f %(alt)s: %(e)s' %
+                          {
+                              'op': o.op,
+                              'alt_amount': o.alt_amount,
+                              'alt': o.alt,
+                              'e': e,
+                          })
+                    continue
+
+                print('Placed order %(order_number)d to '
+                      '%(op)s %(alt_amount).4f %(alt)s' %
                       {
+                          'order_number': order_number,
                           'op': o.op,
                           'alt_amount': o.alt_amount,
                           'alt': o.alt,
-                          'e': e,
                       })
-                raise
 
-            print('Placed order %(order_number)d to '
-                  '%(op)s %(alt_amount).4f %(alt)s' %
-                  {
-                      'order_number': order_number,
-                      'op': o.op,
-                      'alt_amount': o.alt_amount,
-                      'alt': o.alt,
-                  })
+        create_orders(sell_ops)
+        print('Waiting for sell orders to complete...')
+        while True:
+            open_orders = ex.get_orders()
+            if not open_orders:
+                print('All sell orders complete!')
+                break
+            time.sleep(10)
+
+        create_orders(buy_ops)
+        print('Waiting for buy orders to complete...')
+        while True:
+            open_orders = ex.get_orders()
+            if not open_orders:
+                print('All buy orders complete!')
+                break
+            time.sleep(10)
