@@ -70,8 +70,8 @@ class TestPoloniex(unittest.TestCase):
 
     def test_get_rate(self):
         ticker = {
-            'BTC_LTC': {'last': 0.0251},
-            'BTC_NXT': {'last': 0.1234},
+            'BTC_LTC': {'lowestAsk': 0.0251, 'highestBid': 0.0251},
+            'BTC_NXT': {'lowestAsk': 0.1234, 'highestBid': 0.1234},
         }
         with mock.patch.object(self.plx.public, 'returnTicker',
                                return_value=ticker):
