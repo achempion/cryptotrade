@@ -20,6 +20,7 @@
 
 import abc
 import collections
+import time
 
 import six
 from stevedore.enabled import EnabledExtensionManager
@@ -81,15 +82,22 @@ class Exchange(object):
         return worth
 
     def _get_rates(self, type_, gold, other, period, start, end):
-        res = {
-            currency: [
-                candle[type_]
-                for candle in self.get_candlesticks(
-                    gold, currency, period, start, end)
-            ]
-            for currency in other
-            if currency != gold
-        }
+        while True:
+            res = {
+                currency: [
+                    candle[type_]
+                    for candle in self.get_candlesticks(
+                        gold, currency, period, start, end)
+                ]
+                for currency in other
+                if currency != gold
+            }
+            # sometimes candlesticks get back with zero rates, repeat until
+            # succeed
+            if all([v != 0.0 for v in res.values()]):
+                break
+            time.sleep(10)
+
         for k, v in res.items():
             num_of_rates = len(v)
             break
