@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import abc
-import collections
 
 from rpy2.robjects.packages import importr
 import rpy2.robjects as robjects
@@ -33,8 +32,17 @@ STRATEGY_NAMESPACE = 'ct.strategies'
 SELL_OP = 'sell'
 BUY_OP = 'buy'
 
-TradeOp = collections.namedtuple(
-    'TradeOp', ('op', 'gold_amount', 'alt_amount', 'alt', 'rate'))
+
+class TradeOp(object):
+
+    def __init__(self, op=None, gold_amount=None, alt_amount=None,
+                 alt=None, rate=None, scheduled=False):
+        self.op = op
+        self.gold_amount = gold_amount
+        self.alt_amount = alt_amount
+        self.alt = alt
+        self.rate = rate
+        self.scheduled = scheduled
 
 
 def list_strategy_names():
@@ -48,7 +56,7 @@ def get_strategy(name):
 @six.add_metaclass(abc.ABCMeta)
 class Strategy(object):
 
-    def __init__(self, adjust_gold=1.05):
+    def __init__(self, adjust_gold=1.02):
         self.adjust_gold = adjust_gold
 
     @abc.abstractmethod
@@ -74,13 +82,14 @@ class Strategy(object):
             gold_worth = balances[currency] * rate
             gold_target = gold_total * target
             gold_diff = abs(gold_target - gold_worth)
-            # adjust a bit for any float pennies
-            gold_diff = gold_diff / self.adjust_gold
             alt_diff = gold_diff / rate
 
             # todo: use fuzzy comparison
             if gold_worth < gold_target:
-                gold_sold = gold_diff / (1 + fee)
+                gold_diff = gold_diff / self.adjust_gold
+                alt_diff = gold_diff / rate
+
+                gold_sold = gold_diff
                 alt_bought = alt_diff
                 ops.append(
                     TradeOp(
@@ -88,17 +97,19 @@ class Strategy(object):
                         gold_amount=gold_sold,
                         alt_amount=alt_bought,
                         alt=currency,
-                        rate=rate))
+                        rate=rate,
+                        scheduled=False))
             elif gold_worth > gold_target:
                 gold_bought = gold_diff
-                alt_sold = alt_diff * (1 + fee)
+                alt_sold = alt_diff
                 ops.append(
                     TradeOp(
                         op=SELL_OP,
                         gold_amount=gold_bought,
                         alt_amount=alt_sold,
                         alt=currency,
-                        rate=rate))
+                        rate=rate,
+                        scheduled=False))
         return ops
 
     def apply_ops(self, gold, balances, ops):
