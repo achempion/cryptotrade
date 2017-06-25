@@ -54,7 +54,7 @@ class TestPoloniex(unittest.TestCase):
         self.assertEqual(expected, orders)
 
     def test_get_candlesticks(self):
-        with mock.patch.object(self.plx.public, 'returnChartData') as m:
+        with mock.patch.object(self.plx.private, 'returnChartData') as m:
             res = self.plx.get_candlesticks(
                 'BTC', 'XMR', period=300, start=0, end=1000)
         m.assert_called_once_with('BTC_XMR', 300, start=0, end=1000)
@@ -73,13 +73,13 @@ class TestPoloniex(unittest.TestCase):
             'BTC_LTC': {'lowestAsk': 0.0251, 'highestBid': 0.0251},
             'BTC_NXT': {'lowestAsk': 0.1234, 'highestBid': 0.1234},
         }
-        with mock.patch.object(self.plx.public, 'returnTicker',
+        with mock.patch.object(self.plx.private, 'returnTicker',
                                return_value=ticker):
             res = self.plx.get_rate('BTC', 'LTC')
         self.assertEqual(0.0251, res)
 
     def test_ticker_cache(self):
-        with mock.patch.object(self.plx.public, 'returnTicker') as m:
+        with mock.patch.object(self.plx.private, 'returnTicker') as m:
             self.plx._ticker()
             self.plx._ticker()
         # second call hasn't called to external api due to cache

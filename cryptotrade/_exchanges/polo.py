@@ -40,16 +40,16 @@ class Poloniex(exchange.Exchange):
 
     def __init__(self, conf):
         super(Poloniex, self).__init__(conf)
-        self.public = plx.PoloniexPublic()
         poloniex_conf = conf.get('poloniex')
         if not poloniex_conf:
             raise MissingPoloniexSection
         for key in ('api_key', 'api_secret'):
             if key not in poloniex_conf:
                 raise MissingPoloniexApiKey
+        self.api_key = poloniex_conf['api_key'].encode('utf-8')
+        self.api_secret = poloniex_conf['api_secret'].encode('utf-8')
         self.private = plx.Poloniex(
-            apikey=poloniex_conf['api_key'].encode('utf-8'),
-            secret=poloniex_conf['api_secret'].encode('utf-8'))
+            apikey=self.api_key, secret=self.api_secret)
 
     def get_balances(self):
         balances = self.private.returnBalances()
@@ -65,7 +65,7 @@ class Poloniex(exchange.Exchange):
 
     @cached_property_with_ttl(ttl=60)
     def _ticker(self):
-        return self.public.returnTicker()
+        return self.private.returnTicker()
 
     def get_rate(self, from_, to_):
         if from_ == to_:
@@ -73,11 +73,11 @@ class Poloniex(exchange.Exchange):
         ticker = self._ticker
         from_ = from_ if from_ != 'USD' else 'USDT'
         pair = '%s_%s' % (from_, to_)
-        return (ticker[pair]['lowestAsk'] + ticker[pair]['highestBid']) / 2
+        return ticker[pair]['highestBid']
 
     def get_candlesticks(self, from_, to_, period, start, end):
         assert from_ == 'BTC', 'poloneix has pairs for BTC only'
-        return self.public.returnChartData(
+        return self.private.returnChartData(
             '%s_%s' % (from_, to_), period, start=start, end=end)
 
     def get_orders(self):
