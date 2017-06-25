@@ -3,5 +3,6 @@ language: python
 python:
   - "2.7"
   - "3.5"
+before_install: apt-get install R-devel
 install: pip install tox-travis
 script: tox
