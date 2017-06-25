@@ -202,7 +202,7 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
                 time.sleep(10)
                 time_waited += 10
 
-                orders = ex.get_orders():
+                orders = ex.get_orders()
                 if not orders and all([o.scheduled for o in ops_]):
                     print('All orders executed!')
                     exit = True
