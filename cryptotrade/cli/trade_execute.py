@@ -194,10 +194,10 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
                               'alt': o.alt,
                           })
 
-            time_waited = 0
+            now = time.time()
             while True:
                 # if orders don't execute for a while, respin trading
-                if time_waited > 300:
+                if time.time() - now > 300:
                     break
 
                 if any([not o.scheduled for o in sell_ops]):
@@ -206,7 +206,6 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
                     create_orders(buy_ops)
 
                 time.sleep(10)
-                time_waited += 10
 
                 orders = ex.get_orders()
                 if not orders and all([o.scheduled for o in ops_]):
