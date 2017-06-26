@@ -50,10 +50,16 @@ class TradeExecuteCommand(trade_base.BaseTradeCommand):
         return parser
 
     def take_action(self, parsed_args):
+        attempts = 0
         while True:
             # flag indicating whether we are done with all trading for the
             # cycle and can bail out
             exit = False
+            attempts += 1
+            if attempts > 3:
+                print("Couldn't complete trading cycle with "
+                      "all orders closed, bailing out")
+                break
 
             ex = exchange.get_exchange_by_name(
                 self.app.cfg, parsed_args.exchange)
